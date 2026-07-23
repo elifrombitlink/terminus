@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { TerminusApp } from "./terminus-app";
+import { App } from "./App";
 import "./globals.css";
 
 const container = document.getElementById("root");
@@ -10,6 +10,6 @@ if (!container) {
 
 createRoot(container).render(
   <StrictMode>
-    <TerminusApp />
+    <App />
   </StrictMode>,
 );

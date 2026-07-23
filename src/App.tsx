@@ -1,0 +1,58 @@
+import { SessionProvider, useSession } from "./lib/session";
+import { SignIn } from "./components/sign-in";
+import { TerminusApp } from "./terminus-app";
+
+function Gate() {
+  const { demo, loading, session, signOut } = useSession();
+
+  // No Supabase project configured yet: run the Command interface on sample
+  // data so the deployed site is never a blank sign-in wall.
+  if (demo) return <TerminusApp />;
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          color: "var(--quiet)",
+          fontSize: 10,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+        }}
+      >
+        Establishing command link…
+      </div>
+    );
+  }
+
+  if (!session) return <SignIn />;
+
+  return (
+    <>
+      <TerminusApp />
+      <button
+        className="tiny-button"
+        type="button"
+        onClick={() => void signOut()}
+        style={{
+          position: "fixed",
+          top: 16,
+          right: 16,
+          zIndex: 40,
+        }}
+      >
+        Sign out
+      </button>
+    </>
+  );
+}
+
+export function App() {
+  return (
+    <SessionProvider>
+      <Gate />
+    </SessionProvider>
+  );
+}
