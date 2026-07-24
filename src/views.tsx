@@ -35,6 +35,17 @@ const statusText: Record<string, string> = {
   done: "Complete",
 };
 
+/** Case-insensitive match of a query against any of the given fields. */
+function hit(query: string | undefined, ...fields: (string | number)[]) {
+  const q = (query ?? "").trim().toLowerCase();
+  if (!q) return true;
+  return fields.some((f) => String(f).toLowerCase().includes(q));
+}
+
+function EmptyState({ label }: { label: string }) {
+  return <div className="empty-state">No {label} match this search.</div>;
+}
+
 type Readout = [label: string, value: string];
 
 export function PageHead({
@@ -176,7 +187,10 @@ const missions: Mission[] = [
   },
 ];
 
-export function MissionsView() {
+export function MissionsView({ query }: { query?: string }) {
+  const rows = missions.filter((m) =>
+    hit(query, m.id, m.name, m.brief, m.status, m.lead, ...m.agents),
+  );
   return (
     <>
       <PageHead
@@ -191,8 +205,9 @@ export function MissionsView() {
         ]}
       />
       <HazardBar label="Theatre" />
+      {rows.length === 0 && <EmptyState label="missions" />}
       <div className="mission-grid">
-        {missions.map((m) => (
+        {rows.map((m) => (
           <article className={`mission-card ${m.status}`} key={m.id}>
             <div className="mission-top">
               <span className="micro">{m.id}</span>
@@ -296,7 +311,10 @@ const signals: Signal[] = [
   },
 ];
 
-export function SignalsView() {
+export function SignalsView({ query }: { query?: string }) {
+  const rows = signals.filter((s) =>
+    hit(query, s.id, s.source, s.title, s.detail, s.severity),
+  );
   return (
     <>
       <PageHead
@@ -311,9 +329,10 @@ export function SignalsView() {
         ]}
       />
       <HazardBar label="Intercept" />
+      {rows.length === 0 && <EmptyState label="signals" />}
       <div className="panel">
         <div className="signal-list">
-          {signals.map((s) => (
+          {rows.map((s) => (
             <div className={`signal-row ${s.severity}`} key={s.id}>
               <div className="signal-sev" aria-hidden="true" />
               <div className="signal-body">
@@ -339,8 +358,14 @@ export function SignalsView() {
 
 type LogEntry = { time: string; actor: string; copy: string; type: string };
 
-export function MissionLogView({ log }: { log: LogEntry[] }) {
-  const extended: LogEntry[] = [
+export function MissionLogView({
+  log,
+  query,
+}: {
+  log: LogEntry[];
+  query?: string;
+}) {
+  const base: LogEntry[] = [
     ...log,
     {
       time: "05:12:44",
@@ -367,6 +392,9 @@ export function MissionLogView({ log }: { log: LogEntry[] }) {
       type: "USER",
     },
   ];
+  const extended = base.filter((e) =>
+    hit(query, e.time, e.actor, e.copy.replace(/<[^>]+>/g, ""), e.type),
+  );
   return (
     <>
       <PageHead
@@ -474,7 +502,10 @@ const docs: Doc[] = [
   },
 ];
 
-export function ArchivesView() {
+export function ArchivesView({ query }: { query?: string }) {
+  const rows = docs.filter((d) =>
+    hit(query, d.id, d.type, d.title, d.summary, d.version),
+  );
   return (
     <>
       <PageHead
@@ -489,8 +520,9 @@ export function ArchivesView() {
         ]}
       />
       <HazardBar label="Records" />
+      {rows.length === 0 && <EmptyState label="documents" />}
       <div className="doc-grid">
-        {docs.map((d) => (
+        {rows.map((d) => (
           <article className="doc-card" key={d.id}>
             <div className="doc-top">
               <span className={`doc-type ${d.type.toLowerCase()}`}>{d.type}</span>
@@ -571,7 +603,10 @@ const modules: Module[] = [
   },
 ];
 
-export function ModulesView() {
+export function ModulesView({ query }: { query?: string }) {
+  const rows = modules.filter((m) =>
+    hit(query, m.name, m.category, m.state, m.detail, ...m.caps),
+  );
   return (
     <>
       <PageHead
@@ -586,8 +621,9 @@ export function ModulesView() {
         ]}
       />
       <HazardBar label="Interface" />
+      {rows.length === 0 && <EmptyState label="modules" />}
       <div className="module-grid">
-        {modules.map((m) => (
+        {rows.map((m) => (
           <article className={`module-card ${m.state}`} key={m.name}>
             <div className="module-top">
               <div>
@@ -682,7 +718,10 @@ const protocols: Protocol[] = [
   },
 ];
 
-export function ProtocolsView() {
+export function ProtocolsView({ query }: { query?: string }) {
+  const rows = protocols.filter((p) =>
+    hit(query, p.id, p.name, p.trigger, p.schedule, p.lastRun, p.state),
+  );
   return (
     <>
       <PageHead
@@ -709,7 +748,7 @@ export function ProtocolsView() {
             </tr>
           </thead>
           <tbody>
-            {protocols.map((p) => (
+            {rows.map((p) => (
               <tr key={p.id} className={`protocol-row ${p.state}`}>
                 <td>
                   <div className="protocol-name">{p.name}</div>
@@ -781,7 +820,10 @@ const agents: Agent[] = [
   },
 ];
 
-export function CoreView() {
+export function CoreView({ query }: { query?: string }) {
+  const roster = agents.filter((a) =>
+    hit(query, a.name, a.role, a.fn, a.state, a.clearance),
+  );
   return (
     <>
       <PageHead
@@ -797,7 +839,7 @@ export function CoreView() {
       />
       <HazardBar label="Pantheon" />
       <div className="agent-grid">
-        {agents.map((a) => (
+        {roster.map((a) => (
           <article className={`agent-card ${a.state}`} key={a.name}>
             <div className="agent-top">
               <span className="display-face agent-name">{a.name}</span>
@@ -843,13 +885,18 @@ export function ObjectivesView({
   objectives,
   onSelect,
   selectedId,
+  query,
 }: {
   objectives: ObjectiveLike[];
   onSelect: (id: string) => void;
   selectedId: string | null;
+  query?: string;
 }) {
   const open = objectives.filter((o) => o.status !== "done").length;
   const overdue = objectives.filter((o) => o.overdue).length;
+  const rows = objectives.filter((o) =>
+    hit(query, o.id, o.title, o.mission, o.status, o.priority, o.assignee),
+  );
   return (
     <>
       <PageHead
@@ -877,7 +924,7 @@ export function ObjectivesView({
             </tr>
           </thead>
           <tbody>
-            {objectives.map((o) => (
+            {rows.map((o) => (
               <tr
                 key={o.id}
                 className={`objective-row ${o.id === selectedId ? "selected" : ""}`}
@@ -927,8 +974,9 @@ export function ObjectivesView({
             ))}
           </tbody>
         </table>
+        {rows.length === 0 && <EmptyState label="objectives" />}
         <div className="panel-footer">
-          <span>{objectives.length} records visible</span>
+          <span>{rows.length} records visible</span>
           <Barcode value="OBJ-REGISTER-12" bars={56} height={16} />
         </div>
       </div>
@@ -941,11 +989,16 @@ export function ObjectivesView({
 export function AuthorizationView({
   authorizations,
   onResolve,
+  query,
 }: {
   authorizations: AuthorizationLike[];
   onResolve: (id: string, decision: "approved" | "held") => void;
+  query?: string;
 }) {
   const pending = authorizations.filter((a) => a.state === "pending").length;
+  const rows = authorizations.filter((a) =>
+    hit(query, a.id, a.actor, a.title, a.detail, a.risk, a.system, a.state),
+  );
   return (
     <>
       <PageHead
@@ -960,8 +1013,9 @@ export function AuthorizationView({
         ]}
       />
       <HazardBar label="Gate" />
+      {rows.length === 0 && <EmptyState label="authorizations" />}
       <div className="auth-grid">
-        {authorizations.map((a) => (
+        {rows.map((a) => (
           <div className={`authorization-card ${a.risk}`} key={a.id}>
             <div className="auth-top">
               <span className={`risk ${a.risk}`}>{a.risk} risk</span>

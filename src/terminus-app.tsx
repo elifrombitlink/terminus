@@ -843,29 +843,31 @@ export function TerminusApp() {
           </>
           )}
 
-          {view === "Missions" && <MissionsView />}
+          {view === "Missions" && <MissionsView query={query} />}
           {view === "Objectives" && (
             <ObjectivesView
               objectives={objectives}
               selectedId={selectedId}
+              query={query}
               onSelect={(id) => {
                 setSelectedId(id);
                 setActiveTab("overview");
               }}
             />
           )}
-          {view === "Signals" && <SignalsView />}
-          {view === "Mission Log" && <MissionLogView log={log} />}
-          {view === "Archives" && <ArchivesView />}
-          {view === "Modules" && <ModulesView />}
-          {view === "Protocols" && <ProtocolsView />}
+          {view === "Signals" && <SignalsView query={query} />}
+          {view === "Mission Log" && <MissionLogView log={log} query={query} />}
+          {view === "Archives" && <ArchivesView query={query} />}
+          {view === "Modules" && <ModulesView query={query} />}
+          {view === "Protocols" && <ProtocolsView query={query} />}
           {view === "Authorization" && (
             <AuthorizationView
               authorizations={authorizations}
               onResolve={resolveAuthorization}
+              query={query}
             />
           )}
-          {view === "Terminus Core" && <CoreView />}
+          {view === "Terminus Core" && <CoreView query={query} />}
         </main>
       </div>
 
