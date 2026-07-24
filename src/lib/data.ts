@@ -22,6 +22,7 @@ export type LiveObjective = {
   dueLabel: string;
   overdue?: boolean;
   progress: number;
+  position?: number;
   aiSummary: string;
   comments: { author: string; body: string; time: string }[];
   links: { type: string; label: string }[];
@@ -141,7 +142,7 @@ async function loadObjectives(orgId: string): Promise<LiveObjective[]> {
   const { data, error } = await supabase
     .from("objectives")
     .select(
-      `id, code, title, description, status, priority, due_at, progress, ai_summary,
+      `id, code, title, description, status, priority, due_at, progress, position, ai_summary,
        owner_agent:agents!objectives_owner_agent_id_fkey(code),
        owner_user_id,
        mission:missions!objectives_mission_id_fkey(code, name),
@@ -149,6 +150,7 @@ async function loadObjectives(orgId: string): Promise<LiveObjective[]> {
        record_links(link_type, label)`,
     )
     .eq("organization_id", orgId)
+    .order("position", { ascending: true, nullsFirst: false })
     .order("priority", { ascending: true })
     .order("due_at", { ascending: true, nullsFirst: false });
   if (error || !data) return [];
@@ -165,6 +167,7 @@ async function loadObjectives(orgId: string): Promise<LiveObjective[]> {
     dueLabel: dueLabel(row.due_at),
     overdue: isOverdue(row.due_at, row.status),
     progress: row.progress ?? 0,
+    position: row.position ?? undefined,
     aiSummary: row.ai_summary ?? "",
     comments: (row.comments ?? [])
       .sort((a: any, b: any) => (a.created_at < b.created_at ? -1 : 1))
@@ -397,6 +400,18 @@ export async function dbUpdateObjective(
 ): Promise<boolean> {
   if (!supabase) return false;
   const { error } = await supabase.from("objectives").update(patch).eq("id", uuid);
+  return !error;
+}
+
+export async function dbSetObjectivePosition(
+  uuid: string,
+  position: number,
+): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase
+    .from("objectives")
+    .update({ position })
+    .eq("id", uuid);
   return !error;
 }
 

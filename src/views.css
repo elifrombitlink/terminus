@@ -474,3 +474,17 @@
 .group-toggle .micro {
   margin-right: 2px;
 }
+
+/* Table row reorder feedback */
+.objective-marker.grip {
+  cursor: grab;
+  color: var(--quiet);
+  letter-spacing: -3px;
+  font-size: 12px;
+}
+.objective-row.dragging {
+  opacity: 0.45;
+}
+.objective-row.drop-target td {
+  box-shadow: inset 0 2px 0 var(--scan-bright);
+}

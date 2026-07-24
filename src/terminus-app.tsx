@@ -20,6 +20,7 @@ import {
   loadWorkspace,
   dbCreateObjective,
   dbUpdateObjective,
+  dbSetObjectivePosition,
   dbResolveApproval,
   dbAddComment,
   dbAckSignal,
@@ -85,6 +86,7 @@ type Objective = {
   dueLabel: string;
   overdue?: boolean;
   progress: number;
+  position?: number;
   aiSummary: string;
   comments: { author: string; body: string; time: string }[];
   links: { type: string; label: string }[];
@@ -416,6 +418,34 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
       },
       ...current,
     ]);
+  }
+
+  // Manual reorder: move dragId to sit before targetId in the queue, and
+  // persist a fractional position between its new neighbours when live.
+  function reorderObjective(dragId: string, targetId: string) {
+    if (dragId === targetId) return;
+    setObjectives((current) => {
+      const from = current.findIndex((o) => o.id === dragId);
+      const to = current.findIndex((o) => o.id === targetId);
+      if (from < 0 || to < 0) return current;
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      const insertAt = next.findIndex((o) => o.id === targetId);
+      next.splice(insertAt, 0, moved);
+
+      const idx = next.findIndex((o) => o.id === dragId);
+      const prev = next[idx - 1]?.position;
+      const following = next[idx + 1]?.position;
+      let position: number;
+      if (prev != null && following != null) position = (prev + following) / 2;
+      else if (prev != null) position = prev + 1;
+      else if (following != null) position = following - 1;
+      else position = idx;
+      moved.position = position;
+
+      if (live && moved.uuid) void dbSetObjectivePosition(moved.uuid, position);
+      return next;
+    });
   }
 
   async function addObjective(event: FormEvent<HTMLFormElement>) {
@@ -1030,6 +1060,7 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
               onPriorityChange={(id, priority) =>
                 updateObjective(id, { priority: priority as Priority })
               }
+              onReorder={reorderObjective}
             />
           )}
           {view === "Signals" && (

@@ -946,6 +946,7 @@ export function ObjectivesView({
   query,
   onStatusChange,
   onPriorityChange,
+  onReorder,
 }: {
   objectives: ObjectiveLike[];
   onSelect: (id: string) => void;
@@ -953,11 +954,16 @@ export function ObjectivesView({
   query?: string;
   onStatusChange?: (id: string, status: string) => void;
   onPriorityChange?: (id: string, priority: string) => void;
+  onReorder?: (dragId: string, targetId: string) => void;
 }) {
   const [status, setStatus] = useState<string>("all");
   const [mode, setMode] = useState<"table" | "board">("table");
   const [groupBy, setGroupBy] = useState<"status" | "priority">("status");
   const [dragLane, setDragLane] = useState<string | null>(null);
+  const [dragRow, setDragRow] = useState<string | null>(null);
+  const [overRow, setOverRow] = useState<string | null>(null);
+  // Manual reorder is only meaningful on the unfiltered, unsorted full list.
+  const canReorder = Boolean(onReorder) && status === "all" && !(query ?? "").trim();
   const lanes = groupBy === "status" ? OBJ_LANES : PRIORITY_LANES;
   const laneKeyOf = (o: ObjectiveLike) =>
     groupBy === "status" ? o.status : o.priority;
@@ -1124,13 +1130,54 @@ export function ObjectivesView({
             {rows.map((o) => (
               <tr
                 key={o.id}
-                className={`objective-row ${o.id === selectedId ? "selected" : ""}`}
+                className={`objective-row ${o.id === selectedId ? "selected" : ""} ${
+                  overRow === o.id ? "drop-target" : ""
+                } ${dragRow === o.id ? "dragging" : ""}`}
+                draggable={canReorder}
+                onDragStart={
+                  canReorder
+                    ? (e) => {
+                        setDragRow(o.id);
+                        e.dataTransfer.setData("text/plain", o.id);
+                      }
+                    : undefined
+                }
+                onDragOver={
+                  canReorder
+                    ? (e) => {
+                        e.preventDefault();
+                        setOverRow(o.id);
+                      }
+                    : undefined
+                }
+                onDragLeave={
+                  canReorder
+                    ? () => setOverRow((r) => (r === o.id ? null : r))
+                    : undefined
+                }
+                onDrop={
+                  canReorder
+                    ? (e) => {
+                        e.preventDefault();
+                        const id = e.dataTransfer.getData("text/plain");
+                        if (id && id !== o.id) onReorder?.(id, o.id);
+                        setDragRow(null);
+                        setOverRow(null);
+                      }
+                    : undefined
+                }
+                onDragEnd={canReorder ? () => {
+                  setDragRow(null);
+                  setOverRow(null);
+                } : undefined}
                 onClick={() => onSelect(o.id)}
               >
                 <td>
                   <div className="objective-main">
-                    <span className="objective-marker">
-                      {o.status === "done" ? "✓" : "□"}
+                    <span
+                      className={`objective-marker ${canReorder ? "grip" : ""}`}
+                    >
+                      {canReorder ? "⋮⋮" : o.status === "done" ? "✓" : "□"}
                     </span>
                     <div style={{ minWidth: 0 }}>
                       <div className="objective-title">{o.title}</div>
