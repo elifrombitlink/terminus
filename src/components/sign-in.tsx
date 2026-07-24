@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { useSession } from "../lib/session";
+import { Scanner } from "./scanner";
 
 type Mode = "signin" | "signup";
 
@@ -36,8 +37,10 @@ export function SignIn() {
   }
 
   return (
-    <div className="modal-backdrop" style={{ position: "fixed" }}>
-      <form className="modal" onSubmit={submit}>
+    <div className="access-shell">
+      <div className="access-card">
+        <Scanner node="TERM-01" left="LINK" right="AUTH" />
+        <form className="modal" onSubmit={submit}>
         <div className="modal-label">
           <div>
             <div className="micro" style={{ color: "#2c3335" }}>
@@ -113,7 +116,9 @@ export function SignIn() {
                 : "Request"}
           </button>
         </div>
-      </form>
+        </form>
+        <div className="access-foot">Terminus // Command · Authorized operators only</div>
+      </div>
     </div>
   );
 }
