@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useSession } from "../lib/session";
 import { Scanner } from "./scanner";
+import { Barcode } from "./insignia";
 
 type Mode = "signin" | "signup";
 
@@ -48,7 +49,7 @@ export function SignIn() {
             </div>
             <h2>{mode === "signin" ? "Operator sign in" : "Request access"}</h2>
           </div>
-          <div className="barcode" style={{ backgroundColor: "transparent" }} />
+          <Barcode value="TERM-01-ACS" bars={30} height={16} code={false} />
         </div>
         <div className="modal-body">
           <div className="field">

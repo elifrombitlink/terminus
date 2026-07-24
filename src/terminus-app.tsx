@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Scanner } from "./components/scanner";
+import { Barcode, HazardBar } from "./components/insignia";
 
 type ObjectiveStatus = "active" | "review" | "blocked" | "queued" | "done";
 type Priority = "P0" | "P1" | "P2";
@@ -519,6 +520,8 @@ export function TerminusApp() {
             </div>
           </section>
 
+          <HazardBar label="Operations" />
+
           <section className="stats" aria-label="Operational summary">
             <Stat
               label="Active missions"
@@ -680,7 +683,7 @@ export function TerminusApp() {
               )}
               <div className="panel-footer">
                 <span>{filteredObjectives.length} records visible</span>
-                <div className="barcode" aria-hidden="true" />
+                <Barcode value="OBJ-REG-2026" bars={58} height={16} />
               </div>
             </div>
 
@@ -792,7 +795,7 @@ export function TerminusApp() {
               </div>
               <div className="panel-footer">
                 <span>Last health sweep // 06:13 UTC</span>
-                <div className="barcode" aria-hidden="true" />
+                <Barcode value="SYS-HLTH-06" bars={52} height={16} />
               </div>
             </div>
           </section>
@@ -825,7 +828,7 @@ export function TerminusApp() {
                   ×
                 </button>
                 <strong>{selected.id.replace("OBJ-", "")}</strong>
-                <div className="barcode" aria-hidden="true" />
+                <Barcode value={selected.id} bars={32} height={14} code={false} />
               </div>
             </div>
             <div className="inspector-body">
