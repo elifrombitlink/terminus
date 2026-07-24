@@ -1,12 +1,14 @@
 node_modules
 dist
-.env
-.env.local
-.env.*.local
 *.log
 .DS_Store
 .wrangler
 
-# stray env backups
+# Environment — ignore every .env variant except the checked-in example.
+.env
+.env.*
+!.env.example
+
+# Stray backups
+*.bak
 *.hold
-.env.*.local
