@@ -1,0 +1,349 @@
+/* ============================================================
+   VIEW LAYER — Missions, Objectives, Signals, Mission Log,
+   Archives, Modules, Protocols, Authorization, Terminus Core.
+   Reuses the spec-sheet primitives; adds per-view cards. All
+   colour comes from tokens so it flips with the theme.
+   ============================================================ */
+
+/* Page head (command-heading variant used by every secondary view) */
+.view-head-side {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: center;
+}
+.view-head-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.view-readouts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.view-readouts .telemetry-value {
+  color: var(--paper-bright);
+}
+
+/* Extra status colours shared across views */
+.badge.planning { color: var(--blue-bright); border-color: var(--blue); }
+.badge.complete { color: var(--sage); border-color: var(--sage); }
+.risk.critical { color: var(--danger); }
+.risk.warning { color: var(--warning); }
+.risk.info { color: var(--blue-bright); }
+.risk.nominal { color: var(--sage); }
+.system-state.nominal { color: var(--sage); }
+.system-state.offline { color: var(--danger); }
+.system-state.ok { color: var(--sage); }
+.system-state.running { color: var(--blue-bright); }
+.system-state.pending { color: var(--quiet); }
+.system-state.flagged { color: var(--warning); }
+
+/* ---------------------------------------------------------- Missions */
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+.mission-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 16px 16px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  position: relative;
+}
+.mission-card.active { box-shadow: inset 3px 0 var(--scan); }
+.mission-card.blocked { box-shadow: inset 3px 0 var(--danger); }
+.mission-card.planning { box-shadow: inset 3px 0 var(--ochre); }
+.mission-card.complete { box-shadow: inset 3px 0 var(--sage); }
+.mission-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mission-card h3 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1;
+}
+.mission-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+.mission-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 11px;
+}
+.mission-meta .telemetry-value {
+  display: block;
+  margin-top: 3px;
+  color: var(--paper-bright);
+  font-size: 10px;
+}
+.mission-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mission-progress .progress-track {
+  flex: 1;
+}
+.mission-agents {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.agent-chips,
+.cap-chips {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.agent-chip,
+.cap-chip {
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  padding: 3px 6px;
+  border: 1px solid var(--line-bright);
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------- Signals */
+.signal-list {
+  display: flex;
+  flex-direction: column;
+}
+.signal-row {
+  display: grid;
+  grid-template-columns: 4px 1fr;
+  border-bottom: 1px solid var(--line);
+}
+.signal-row:last-child { border-bottom: 0; }
+.signal-row.critical .signal-sev { background: var(--danger); }
+.signal-row.warning .signal-sev { background: var(--warning); }
+.signal-row.info .signal-sev { background: var(--blue); }
+.signal-row.nominal .signal-sev { background: var(--sage); }
+.signal-body {
+  padding: 14px 16px;
+}
+.signal-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.signal-time {
+  margin-left: auto;
+}
+.signal-body h4 {
+  margin: 8px 0 4px;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+.signal-body p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.65;
+  max-width: 92ch;
+}
+
+/* ---------------------------------------------------------- Mission Log */
+.logfeed {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------- Archives */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+.doc-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 15px 15px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-height: 150px;
+}
+.doc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.doc-type {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  padding: 3px 7px;
+  text-transform: uppercase;
+  border: 1px solid var(--line-bright);
+  color: var(--muted);
+}
+.doc-type.adr { color: var(--blue-bright); border-color: var(--blue); }
+.doc-type.policy { color: var(--ochre); border-color: var(--ochre); }
+.doc-type.procedure { color: var(--sage); border-color: var(--sage); }
+.doc-type.spec { color: var(--muted); }
+.doc-card h3 {
+  margin: 0;
+  font: 700 15px/1.1 "Arial Narrow", "Bahnschrift", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.doc-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.65;
+  flex: 1;
+}
+.doc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+}
+
+/* ---------------------------------------------------------- Modules */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+.module-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+.module-card.nominal { box-shadow: inset 3px 0 var(--sage); }
+.module-card.standby { box-shadow: inset 3px 0 var(--warning); }
+.module-card.offline { box-shadow: inset 3px 0 var(--danger); }
+.module-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.module-card h3 {
+  margin: 4px 0 0;
+  font-size: 21px;
+  line-height: 1;
+}
+.module-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.65;
+}
+.module-card .signal-line {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+}
+.module-card .signal-line span {
+  flex: 1;
+  background: var(--scan-bright);
+}
+.module-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 11px;
+}
+
+/* ---------------------------------------------------------- Protocols */
+.protocol-table td { vertical-align: middle; }
+.protocol-name {
+  color: var(--text);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 3px;
+}
+.protocol-row.running { box-shadow: inset 3px 0 var(--blue); }
+.protocol-row.flagged { box-shadow: inset 3px 0 var(--warning); }
+
+/* ---------------------------------------------------------- Terminus Core */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.agent-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  position: relative;
+}
+.agent-card.ready { box-shadow: inset 3px 0 var(--sage); }
+.agent-card.held { box-shadow: inset 3px 0 var(--warning); }
+.agent-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.agent-name {
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+.agent-role {
+  color: var(--blue-bright);
+}
+.agent-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.65;
+  flex: 1;
+}
+.agent-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.core-config {
+  padding: 4px 18px;
+}
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+}
+.config-row:last-child { border-bottom: 0; }
+.config-row .telemetry-value {
+  color: var(--paper-bright);
+  font-size: 11px;
+}

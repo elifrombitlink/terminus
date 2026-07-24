@@ -3,6 +3,17 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Scanner } from "./components/scanner";
 import { Barcode, HazardBar } from "./components/insignia";
+import {
+  MissionsView,
+  ObjectivesView,
+  SignalsView,
+  MissionLogView,
+  ArchivesView,
+  ModulesView,
+  ProtocolsView,
+  AuthorizationView,
+  CoreView,
+} from "./views";
 
 type ObjectiveStatus = "active" | "review" | "blocked" | "queued" | "done";
 type Priority = "P0" | "P1" | "P2";
@@ -211,6 +222,19 @@ const navGroups = [
   },
 ];
 
+const viewCodes: Record<string, string> = {
+  Command: "SYS.COM // 001",
+  Missions: "SYS.MIS // 006",
+  Objectives: "SYS.OBJ // 012",
+  Signals: "SYS.SIG // 003",
+  "Mission Log": "SYS.LOG // 472",
+  Archives: "SYS.ARC // 048",
+  Modules: "SYS.MOD // 006",
+  Protocols: "SYS.PRT // 008",
+  Authorization: "SYS.AUTH // 002",
+  "Terminus Core": "SYS.CORE // 001",
+};
+
 const statusLabels: Record<ObjectiveStatus, string> = {
   active: "Active",
   review: "In review",
@@ -230,6 +254,7 @@ function utcClock() {
 }
 
 export function TerminusApp() {
+  const [view, setView] = useState("Command");
   const [objectives, setObjectives] = useState(initialObjectives);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | ObjectiveStatus>("all");
@@ -400,10 +425,14 @@ export function TerminusApp() {
             <nav className="nav">
               {group.items.map(([glyph, label, count]) => (
                 <button
-                  className={`nav-item ${label === "Command" ? "active" : ""}`}
+                  className={`nav-item ${label === view ? "active" : ""}`}
                   key={label}
                   type="button"
                   title={label}
+                  onClick={() => {
+                    setView(label);
+                    setSelectedId(null);
+                  }}
                 >
                   <span className="nav-glyph" aria-hidden="true">
                     {glyph}
@@ -444,8 +473,8 @@ export function TerminusApp() {
             ≡
           </button>
           <div className="topbar-title">
-            <strong>Command</strong>
-            <span className="micro">SYS.COM // 001</span>
+            <strong>{view}</strong>
+            <span className="micro">{viewCodes[view] ?? "SYS // 000"}</span>
           </div>
           <label className="command-search">
             <span className="search-token" aria-hidden="true">
@@ -474,6 +503,8 @@ export function TerminusApp() {
         </header>
 
         <main className="content">
+          {view === "Command" && (
+          <>
           <section className="command-heading">
             <div className="heading-copy">
               <div className="eyebrow">Operational control // online</div>
@@ -799,6 +830,32 @@ export function TerminusApp() {
               </div>
             </div>
           </section>
+          </>
+          )}
+
+          {view === "Missions" && <MissionsView />}
+          {view === "Objectives" && (
+            <ObjectivesView
+              objectives={objectives}
+              selectedId={selectedId}
+              onSelect={(id) => {
+                setSelectedId(id);
+                setActiveTab("overview");
+              }}
+            />
+          )}
+          {view === "Signals" && <SignalsView />}
+          {view === "Mission Log" && <MissionLogView log={log} />}
+          {view === "Archives" && <ArchivesView />}
+          {view === "Modules" && <ModulesView />}
+          {view === "Protocols" && <ProtocolsView />}
+          {view === "Authorization" && (
+            <AuthorizationView
+              authorizations={authorizations}
+              onResolve={resolveAuthorization}
+            />
+          )}
+          {view === "Terminus Core" && <CoreView />}
         </main>
       </div>
 
