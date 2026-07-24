@@ -296,7 +296,7 @@ function utcClock() {
   }).format(new Date());
 }
 
-export function TerminusApp() {
+export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
   const [view, setView] = useState("Command");
   const [navOpen, setNavOpen] = useState(false);
   const [objectives, setObjectives] = useState(initialObjectives);
@@ -527,7 +527,28 @@ export function TerminusApp() {
               <div className="micro">Administrator</div>
               <div className="display-face">Eli Dean</div>
             </div>
-            <span className="status-dot" title="Online" />
+            {onSignOut ? (
+              <button
+                className="operator-signout"
+                type="button"
+                onClick={onSignOut}
+                title="Sign out"
+                aria-label="Sign out"
+              >
+                <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                  <path
+                    d="M14 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2M9 12h11m0 0-3-3m3 3-3 3"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            ) : (
+              <span className="status-dot" title="Online" />
+            )}
           </div>
         </div>
       </aside>

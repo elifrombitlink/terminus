@@ -263,6 +263,22 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
+.operator-signout {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-bright);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.operator-signout:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
 .main-column {
   min-width: 0;
 }
