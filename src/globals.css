@@ -1079,9 +1079,10 @@ textarea:focus-visible {
 .inspector-close {
   border: 0;
   background: transparent;
-  color: var(--ink);
+  color: var(--on-accent);
   font-size: 19px;
   cursor: pointer;
+  line-height: 1;
 }
 
 .inspector-body {
@@ -1846,5 +1847,30 @@ body {
     justify-content: center;
     gap: 0;
     font-size: 15px;
+  }
+}
+
+/* Mobile inspector: full-width slide-out; keep the close control clear and
+   drop the header barcode so nothing overflows the narrow label band. */
+@media (max-width: 560px) {
+  .inspector {
+    width: 100vw;
+  }
+  .inspector-label {
+    grid-template-columns: 7px 1fr 52px;
+  }
+  .label-code .barcode {
+    display: none;
+  }
+  .label-code strong {
+    display: none;
+  }
+  .inspector-label h2 {
+    font-size: 26px;
+  }
+  .inspector-close {
+    font-size: 26px;
+    width: 34px;
+    height: 34px;
   }
 }
