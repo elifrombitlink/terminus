@@ -263,6 +263,26 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
+.signal-button {
+  position: relative;
+}
+
+.icon-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  display: grid;
+  place-items: center;
+  background: var(--red);
+  color: #f4efe3;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
 .operator-signout {
   width: 30px;
   height: 30px;

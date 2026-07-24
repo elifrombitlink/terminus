@@ -924,39 +924,47 @@ export function CoreView({ query }: { query?: string }) {
 
 /* ---------------------------------------------------------------- Objectives */
 
+const OBJ_LANES: [string, string][] = [
+  ["queued", "Queued"],
+  ["active", "Active"],
+  ["review", "In review"],
+  ["blocked", "Blocked"],
+  ["done", "Complete"],
+];
+
 export function ObjectivesView({
   objectives,
   onSelect,
   selectedId,
   query,
+  onStatusChange,
 }: {
   objectives: ObjectiveLike[];
   onSelect: (id: string) => void;
   selectedId: string | null;
   query?: string;
+  onStatusChange?: (id: string, status: string) => void;
 }) {
   const [status, setStatus] = useState<string>("all");
+  const [mode, setMode] = useState<"table" | "board">("table");
+  const [dragLane, setDragLane] = useState<string | null>(null);
   const open = objectives.filter((o) => o.status !== "done").length;
   const overdue = objectives.filter((o) => o.overdue).length;
-  const rows = objectives.filter(
-    (o) =>
-      (status === "all" || o.status === status) &&
-      hit(query, o.id, o.title, o.mission, o.status, o.priority, o.assignee),
+  const matches = objectives.filter((o) =>
+    hit(query, o.id, o.title, o.mission, o.status, o.priority, o.assignee),
   );
+  const rows = matches.filter((o) => status === "all" || o.status === status);
   const filters: [string, string][] = [
     ["all", "All"],
-    ["active", "Active"],
-    ["review", "In review"],
-    ["blocked", "Blocked"],
+    ...(OBJ_LANES.filter(([v]) => v !== "queued") as [string, string][]),
     ["queued", "Queued"],
-    ["done", "Complete"],
   ];
   return (
     <>
       <PageHead
         eyebrow="Execution queue // all records"
         title="Objectives"
-        desc="Every objective across all missions with readiness, ownership, and progress. Select a record to open its full brief."
+        desc="Every objective across all missions with readiness, ownership, and progress. Drag cards between lanes on the board to change status."
         code="OBJ // 012"
         readouts={[
           ["Open", String(open).padStart(2, "0")],
@@ -967,17 +975,100 @@ export function ObjectivesView({
       <HazardBar label="Queue" />
       <div className="panel">
         <div className="filters">
-          {filters.map(([value, label]) => (
+          {mode === "table" &&
+            filters.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className={`filter-button ${status === value ? "active" : ""}`}
+                onClick={() => setStatus(value)}
+              >
+                {label}
+              </button>
+            ))}
+          <div className="view-mode">
             <button
-              key={value}
               type="button"
-              className={`filter-button ${status === value ? "active" : ""}`}
-              onClick={() => setStatus(value)}
+              className={`filter-button ${mode === "table" ? "active" : ""}`}
+              onClick={() => setMode("table")}
             >
-              {label}
+              Table
             </button>
-          ))}
+            <button
+              type="button"
+              className={`filter-button ${mode === "board" ? "active" : ""}`}
+              onClick={() => setMode("board")}
+            >
+              Board
+            </button>
+          </div>
         </div>
+
+        {mode === "board" ? (
+          <div className="board">
+            {OBJ_LANES.map(([laneStatus, label]) => {
+              const cards = matches.filter((o) => o.status === laneStatus);
+              return (
+                <div
+                  key={laneStatus}
+                  className={`board-lane ${dragLane === laneStatus ? "over" : ""}`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragLane(laneStatus);
+                  }}
+                  onDragLeave={() => setDragLane((l) => (l === laneStatus ? null : l))}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const id = e.dataTransfer.getData("text/plain");
+                    if (id) onStatusChange?.(id, laneStatus);
+                    setDragLane(null);
+                  }}
+                >
+                  <div className="board-lane-head">
+                    <span className={`badge ${laneStatus}`}>{label}</span>
+                    <span className="lane-count">{cards.length}</span>
+                  </div>
+                  <div className="board-lane-body">
+                    {cards.map((o) => (
+                      <article
+                        key={o.id}
+                        className={`board-card ${o.id === selectedId ? "selected" : ""}`}
+                        draggable
+                        onDragStart={(e) =>
+                          e.dataTransfer.setData("text/plain", o.id)
+                        }
+                        onClick={() => onSelect(o.id)}
+                      >
+                        <div className="board-card-top">
+                          <span className="objective-id">{o.id}</span>
+                          <span className={`priority ${o.priority.toLowerCase()}`}>
+                            {o.priority}
+                          </span>
+                        </div>
+                        <div className="board-card-title">{o.title}</div>
+                        <div className="board-card-foot">
+                          <span className="assignee">{o.assignee}</span>
+                          <span className={`due ${o.overdue ? "overdue" : ""}`}>
+                            {o.dueLabel}
+                          </span>
+                        </div>
+                        <div className="progress-track">
+                          <div
+                            className="progress-fill"
+                            style={{ width: `${o.progress}%` }}
+                          />
+                        </div>
+                      </article>
+                    ))}
+                    {cards.length === 0 && (
+                      <div className="board-lane-empty">Drop here</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
         <table className="objective-table">
           <thead>
             <tr>
@@ -1040,9 +1131,14 @@ export function ObjectivesView({
             ))}
           </tbody>
         </table>
-        {rows.length === 0 && <EmptyState label="objectives" />}
+        )}
+        {mode === "table" && rows.length === 0 && (
+          <EmptyState label="objectives" />
+        )}
         <div className="panel-footer">
-          <span>{rows.length} records visible</span>
+          <span>
+            {mode === "board" ? matches.length : rows.length} records visible
+          </span>
           <Barcode value="OBJ-REGISTER-12" bars={56} height={16} />
         </div>
       </div>

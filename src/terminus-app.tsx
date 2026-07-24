@@ -19,6 +19,7 @@ import { useSession } from "./lib/session";
 import {
   loadWorkspace,
   dbCreateObjective,
+  dbUpdateObjective,
   dbResolveApproval,
   dbAddComment,
   dbAckSignal,
@@ -391,11 +392,20 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
     id: string,
     patch: Partial<Pick<Objective, "status" | "priority" | "due">>,
   ) {
+    const target = objectives.find((objective) => objective.id === id);
+    if (target && patch.status && target.status === patch.status) return;
     setObjectives((current) =>
       current.map((objective) =>
         objective.id === id ? { ...objective, ...patch } : objective,
       ),
     );
+    if (live && target?.uuid) {
+      void dbUpdateObjective(target.uuid, {
+        ...(patch.status ? { status: patch.status } : {}),
+        ...(patch.priority ? { priority: patch.priority } : {}),
+        ...(patch.due ? { due_at: patch.due } : {}),
+      });
+    }
     const property = Object.keys(patch)[0] ?? "objective";
     setLog((current) => [
       {
@@ -644,8 +654,21 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
           </label>
           <div className="topbar-actions">
             <ThemeToggle />
-            <button className="icon-button" type="button" title="Signals">
+            <button
+              className="icon-button signal-button"
+              type="button"
+              title="Signals"
+              aria-label="Signals"
+              onClick={() => {
+                setView("Signals");
+                setSelectedId(null);
+                setNavOpen(false);
+              }}
+            >
               ◌
+              {signals && signals.length > 0 && (
+                <span className="icon-badge">{signals.length}</span>
+              )}
             </button>
             <button
               className="primary-button new-objective"
@@ -1001,6 +1024,9 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
                 setSelectedId(id);
                 setActiveTab("overview");
               }}
+              onStatusChange={(id, status) =>
+                updateObjective(id, { status: status as ObjectiveStatus })
+              }
             />
           )}
           {view === "Signals" && (

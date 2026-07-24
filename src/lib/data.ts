@@ -391,6 +391,15 @@ export async function dbCreateObjective(input: {
   };
 }
 
+export async function dbUpdateObjective(
+  uuid: string,
+  patch: { status?: string; priority?: string; due_at?: string | null },
+): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from("objectives").update(patch).eq("id", uuid);
+  return !error;
+}
+
 export async function dbResolveApproval(
   uuid: string,
   decision: "approved" | "held",
