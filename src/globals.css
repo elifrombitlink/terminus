@@ -1649,6 +1649,9 @@ body {
   font-size: 8px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  /* Plate behind the label so it reads over the dial ticks and globe. */
+  background: var(--panel);
+  padding: 2px 4px;
 }
 .scanner-cap.left { left: -6px; }
 .scanner-cap.right { right: -6px; }
@@ -1660,6 +1663,8 @@ body {
   color: var(--scan-bright);
   font-size: 8px;
   letter-spacing: 0.16em;
+  background: var(--panel);
+  padding: 2px 5px;
 }
 
 /* ---------- Stat cells: cockpit readouts ---------- */
@@ -1823,6 +1828,8 @@ body {
     var(--void);
 }
 .access-shell .scanner { margin: 0 auto 20px; opacity: 0.9; }
+.access-shell .scanner-cap,
+.access-shell .scanner-node { background: var(--void); }
 .access-card { width: min(460px, 100%); }
 .access-foot {
   margin-top: 14px;
