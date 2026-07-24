@@ -1,0 +1,25 @@
+/* Chakra Petch — open-source (SIL OFL) industrial techno display face, in the
+   Eurostile / Starfield lineage. Self-hosted so it loads offline and fast.
+   Used for the Terminus wordmark and all display headings; body stays mono. */
+
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/chakrapetch-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./fonts/chakrapetch-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./fonts/chakrapetch-700.woff2") format("woff2");
+}

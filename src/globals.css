@@ -142,7 +142,7 @@ textarea:focus-visible {
 
 .brand-name,
 .display-face {
-  font-family: "Arial Narrow", "Bahnschrift", "Eurostile", sans-serif;
+  font-family: "Chakra Petch", "Arial Narrow", "Bahnschrift", "Eurostile", sans-serif;
   font-stretch: condensed;
   text-transform: uppercase;
   letter-spacing: 0.055em;
@@ -259,7 +259,7 @@ textarea:focus-visible {
   place-items: center;
   background: var(--paper);
   color: var(--ink);
-  font-family: "Arial Narrow", sans-serif;
+  font-family: "Chakra Petch", "Arial Narrow", sans-serif;
   font-weight: 800;
 }
 
@@ -287,7 +287,7 @@ textarea:focus-visible {
 
 .topbar-title strong {
   display: block;
-  font: 700 15px/1 "Arial Narrow", "Bahnschrift", sans-serif;
+  font: 700 15px/1 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -428,7 +428,7 @@ textarea:focus-visible {
 
 .heading-copy h1 {
   margin: 17px 0 8px;
-  font: 700 clamp(36px, 4.6vw, 68px)/0.88 "Arial Narrow", "Bahnschrift", sans-serif;
+  font: 700 clamp(36px, 4.6vw, 68px)/0.88 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
   text-transform: uppercase;
   letter-spacing: -0.025em;
 }
@@ -461,7 +461,7 @@ textarea:focus-visible {
 
 .timestamp {
   margin: 5px 0;
-  font: 700 28px/1 "Arial Narrow", "Bahnschrift", sans-serif;
+  font: 700 28px/1 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
   letter-spacing: 0.04em;
 }
 
@@ -564,7 +564,7 @@ textarea:focus-visible {
 
 .stat-value {
   margin-top: 12px;
-  font: 700 29px/1 "Arial Narrow", "Bahnschrift", sans-serif;
+  font: 700 29px/1 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
 }
 
 .stat-note {
@@ -599,7 +599,7 @@ textarea:focus-visible {
 
 .panel-heading h2 {
   margin: 0;
-  font: 700 15px/1 "Arial Narrow", "Bahnschrift", sans-serif;
+  font: 700 15px/1 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
@@ -703,7 +703,7 @@ textarea:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font: 700 12px/1.2 "Arial Narrow", "Bahnschrift", sans-serif;
+  font: 700 12px/1.2 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.035em;
 }
@@ -815,7 +815,7 @@ textarea:focus-visible {
 .authorization-card h3 {
   margin: 13px 0 7px;
   color: var(--paper-bright);
-  font: 700 13px/1.2 "Arial Narrow", "Bahnschrift", sans-serif;
+  font: 700 13px/1.2 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1059,7 +1059,7 @@ textarea:focus-visible {
 
 .inspector-label h2 {
   margin: 9px 0 0;
-  font: 800 30px/0.94 "Arial Narrow", "Bahnschrift", sans-serif;
+  font: 800 30px/0.94 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
   text-transform: uppercase;
   letter-spacing: -0.02em;
 }
@@ -1073,7 +1073,7 @@ textarea:focus-visible {
 }
 
 .label-code strong {
-  font: 800 21px/1 "Arial Narrow", sans-serif;
+  font: 800 21px/1 "Chakra Petch", "Arial Narrow", sans-serif;
 }
 
 .inspector-close {
@@ -1234,7 +1234,7 @@ textarea:focus-visible {
 
 .modal-label h2 {
   margin: 5px 0 0;
-  font: 800 24px/1 "Arial Narrow", sans-serif;
+  font: 800 24px/1 "Chakra Petch", "Arial Narrow", sans-serif;
   text-transform: uppercase;
 }
 
@@ -1339,7 +1339,7 @@ textarea:focus-visible {
 
   .topbar-title,
   .keycap,
-  .topbar-actions .icon-button {
+  .topbar-actions .icon-button:not(.theme-toggle) {
     display: none;
   }
 

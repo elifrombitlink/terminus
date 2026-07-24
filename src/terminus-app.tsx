@@ -14,6 +14,49 @@ import {
   AuthorizationView,
   CoreView,
 } from "./views";
+import { useTheme } from "./lib/theme";
+
+function ThemeToggle() {
+  const { theme, toggle } = useTheme();
+  const dark = theme === "dark";
+  return (
+    <button
+      className="icon-button theme-toggle"
+      type="button"
+      onClick={toggle}
+      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      title={dark ? "Dark // switch to light" : "Light // switch to dark"}
+    >
+      {dark ? (
+        // moon
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path
+            d="M20 14.5A8 8 0 0 1 9.5 4 7 7 0 1 0 20 14.5Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ) : (
+        // sun
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <circle
+            cx="12"
+            cy="12"
+            r="4.2"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+          />
+          <g stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+            <path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.2 5.2l1.9 1.9M16.9 16.9l1.9 1.9M18.8 5.2l-1.9 1.9M7.1 16.9l-1.9 1.9" />
+          </g>
+        </svg>
+      )}
+    </button>
+  );
+}
 
 type ObjectiveStatus = "active" | "review" | "blocked" | "queued" | "done";
 type Priority = "P0" | "P1" | "P2";
@@ -498,6 +541,7 @@ export function TerminusApp() {
             <span className="keycap">⌘ K</span>
           </label>
           <div className="topbar-actions">
+            <ThemeToggle />
             <button className="icon-button" type="button" title="Signals">
               ◌
             </button>

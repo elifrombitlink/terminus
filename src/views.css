@@ -202,7 +202,7 @@
 .doc-type.spec { color: var(--muted); }
 .doc-card h3 {
   margin: 0;
-  font: 700 15px/1.1 "Arial Narrow", "Bahnschrift", sans-serif;
+  font: 700 15px/1.1 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -346,4 +346,12 @@
 .config-row .telemetry-value {
   color: var(--paper-bright);
   font-size: 11px;
+}
+
+/* Authorization queue — two-up on wide screens. */
+.auth-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
 }
