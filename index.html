@@ -4,9 +4,21 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
     <title>Terminus // Command</title>
     <meta name="description" content="Internal operations command platform." />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash. Cream
+      // (light) is the default when nothing is stored.
+      (function () {
+        try {
+          var t = localStorage.getItem("terminus-theme");
+          document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
+        } catch (e) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

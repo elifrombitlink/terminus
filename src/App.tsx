@@ -75,9 +75,9 @@ export function App() {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = window.localStorage.getItem("terminus-theme");
     if (saved === "light" || saved === "dark") return saved;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
+    // Cream is the primary Terminus style — default to light regardless of
+    // the OS preference. Operators can opt into dark from the switch.
+    return "light";
   });
 
   useEffect(() => {

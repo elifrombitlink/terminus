@@ -1,47 +1,47 @@
 :root {
   color-scheme: light;
-  --theme-navy: #102536;
-  --theme-slate: #3f5c73;
-  --theme-steel: #aab6bd;
-  --theme-white: #f2f4f3;
-  --theme-yellow: #eca92f;
-  --theme-orange: #ef6b22;
-  --theme-red: #d92d2a;
-  --theme-black: #222426;
 }
 
+/* DARK MODE — warm navy ground, cream ink, brighter orange/red accents.
+   The alternate to the default cream spec-sheet. Only tokens change (plus a
+   few surfaces the base sheet hardcodes), so the whole app flips from these. */
 html[data-theme="dark"] {
   color-scheme: dark;
 
-  --void: #071117;
-  --ink: #0b1821;
-  --panel: #0e1d27;
-  --panel-raised: #132631;
+  /* Grounds → warm navy */
+  --void: #0b1a27;
+  --ink: #10222f;
+  --panel: #142836;
+  --panel-raised: #1c3141;
 
-  --paper: #f2f4f3;
-  --paper-bright: #ffffff;
-  --text: #dce3e5;
-  --muted: #9ba9ae;
-  --quiet: #65777f;
+  /* Inks → cream / light */
+  --paper: #ece3d0;
+  --paper-bright: #f6f0e2;
+  --text: #e4dcc9;
+  --muted: #93a0a1;
+  --quiet: #6d7670;
 
-  --line: rgb(170 182 189 / 0.16);
-  --line-bright: rgb(170 182 189 / 0.34);
+  /* Hairlines → cream alpha */
+  --line: rgb(233 224 205 / 0.14);
+  --line-bright: rgb(233 224 205 / 0.3);
 
-  --blue: #3f5c73;
-  --blue-bright: #6f8ca3;
-  --scan: #3f5c73;
-  --scan-bright: #6f8ca3;
+  /* Live cue — brighter slate on navy */
+  --blue: #8094d6;
+  --blue-bright: #9db0e6;
+  --scan: #8094d6;
+  --scan-bright: #9db0e6;
 
-  --gold: #eca92f;
-  --ochre: #eca92f;
-  --rust: #ef6b22;
-  --red: #d92d2a;
-  --plum: #8f2727;
-  --sage: #6f8ca3;
-  --warning: #ef6b22;
-  --danger: #d92d2a;
+  /* Retro spectrum — brighter for dark */
+  --gold: #e8a72c;
+  --ochre: #e07a1f;
+  --rust: #f4701f;
+  --red: #e8503f;
+  --plum: #c23824;
+  --sage: #5fa06b;
+  --warning: #e07a1f;
+  --danger: #e8503f;
 
-  --shadow: 0 18px 46px rgb(0 0 0 / 0.28);
+  --shadow: 0 18px 46px rgb(0 0 0 / 0.44);
 }
 
 html[data-theme="dark"],
@@ -51,22 +51,34 @@ html[data-theme="dark"] body {
 
 html[data-theme="dark"] body {
   background:
-    linear-gradient(rgb(242 244 243 / 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(242 244 243 / 0.025) 1px, transparent 1px),
+    linear-gradient(rgb(233 224 205 / 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(233 224 205 / 0.028) 1px, transparent 1px),
     var(--void);
   background-size: 28px 28px;
 }
 
 html[data-theme="dark"] .sidebar {
-  background: rgb(7 17 23 / 0.97);
+  background: rgb(8 20 30 / 0.96);
 }
 
 html[data-theme="dark"] .topbar {
-  background: rgb(7 17 23 / 0.88);
+  background: rgb(8 20 30 / 0.84);
 }
 
 html[data-theme="dark"] .nav-item:hover {
-  background: rgb(242 244 243 / 0.04);
+  background: rgb(233 224 205 / 0.06);
+}
+
+/* The inspector/modal edge shadows and scrims are hardcoded navy in the base
+   sheet; deepen them so the dark surfaces read against the navy ground. */
+html[data-theme="dark"] .inspector {
+  box-shadow: -30px 0 80px rgb(0 0 0 / 0.5);
+}
+html[data-theme="dark"] .inspector-backdrop {
+  background: rgb(3 8 12 / 0.56);
+}
+html[data-theme="dark"] .modal-backdrop {
+  background: rgb(3 8 12 / 0.66);
 }
 
 .theme-switch {
