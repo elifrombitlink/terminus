@@ -255,6 +255,7 @@ function utcClock() {
 
 export function TerminusApp() {
   const [view, setView] = useState("Command");
+  const [navOpen, setNavOpen] = useState(false);
   const [objectives, setObjectives] = useState(initialObjectives);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | ObjectiveStatus>("all");
@@ -409,7 +410,13 @@ export function TerminusApp() {
   }
 
   return (
-    <div className="terminus-shell">
+    <div className={`terminus-shell ${navOpen ? "nav-open" : ""}`}>
+      <button
+        className="sidebar-scrim"
+        type="button"
+        aria-label="Close navigation"
+        onClick={() => setNavOpen(false)}
+      />
       <aside className="sidebar" aria-label="Primary navigation">
         <div className="brand">
           <div className="brand-mark" aria-hidden="true" />
@@ -432,6 +439,7 @@ export function TerminusApp() {
                   onClick={() => {
                     setView(label);
                     setSelectedId(null);
+                    setNavOpen(false);
                   }}
                 >
                   <span className="nav-glyph" aria-hidden="true">
@@ -469,6 +477,7 @@ export function TerminusApp() {
             className="icon-button mobile-menu"
             type="button"
             aria-label="Open navigation"
+            onClick={() => setNavOpen(true)}
           >
             ≡
           </button>
@@ -493,11 +502,12 @@ export function TerminusApp() {
               ◌
             </button>
             <button
-              className="primary-button"
+              className="primary-button new-objective"
               type="button"
               onClick={() => setNewOpen(true)}
             >
-              + New objective
+              <span aria-hidden="true">+</span>
+              <span className="btn-label">New objective</span>
             </button>
           </div>
         </header>

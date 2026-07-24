@@ -126,9 +126,14 @@ html[data-theme="dark"] .theme-switch-knob {
   outline-offset: 2px;
 }
 
-@media (max-width: 760px) {
+/* On mobile the topbar is crowded (menu + search + new-objective), so the
+   theme switch floats bottom-right, clear of the bar and the nav drawer. */
+@media (max-width: 820px) {
   .theme-switch {
-    top: 19px;
-    right: 72px;
+    top: auto;
+    bottom: 18px;
+    right: 16px;
+    box-shadow: var(--shadow);
+    z-index: 25;
   }
 }
