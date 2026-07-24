@@ -932,22 +932,39 @@ const OBJ_LANES: [string, string][] = [
   ["done", "Complete"],
 ];
 
+const PRIORITY_LANES: [string, string][] = [
+  ["P0", "P0 · Critical"],
+  ["P1", "P1 · High"],
+  ["P2", "P2 · Standard"],
+  ["P3", "P3 · Low"],
+];
+
 export function ObjectivesView({
   objectives,
   onSelect,
   selectedId,
   query,
   onStatusChange,
+  onPriorityChange,
 }: {
   objectives: ObjectiveLike[];
   onSelect: (id: string) => void;
   selectedId: string | null;
   query?: string;
   onStatusChange?: (id: string, status: string) => void;
+  onPriorityChange?: (id: string, priority: string) => void;
 }) {
   const [status, setStatus] = useState<string>("all");
   const [mode, setMode] = useState<"table" | "board">("table");
+  const [groupBy, setGroupBy] = useState<"status" | "priority">("status");
   const [dragLane, setDragLane] = useState<string | null>(null);
+  const lanes = groupBy === "status" ? OBJ_LANES : PRIORITY_LANES;
+  const laneKeyOf = (o: ObjectiveLike) =>
+    groupBy === "status" ? o.status : o.priority;
+  const applyLane = (id: string, key: string) =>
+    groupBy === "status"
+      ? onStatusChange?.(id, key)
+      : onPriorityChange?.(id, key);
   const open = objectives.filter((o) => o.status !== "done").length;
   const overdue = objectives.filter((o) => o.overdue).length;
   const matches = objectives.filter((o) =>
@@ -987,6 +1004,25 @@ export function ObjectivesView({
               </button>
             ))}
           <div className="view-mode">
+            {mode === "board" && (
+              <div className="group-toggle">
+                <span className="micro">Group</span>
+                <button
+                  type="button"
+                  className={`filter-button ${groupBy === "status" ? "active" : ""}`}
+                  onClick={() => setGroupBy("status")}
+                >
+                  Status
+                </button>
+                <button
+                  type="button"
+                  className={`filter-button ${groupBy === "priority" ? "active" : ""}`}
+                  onClick={() => setGroupBy("priority")}
+                >
+                  Priority
+                </button>
+              </div>
+            )}
             <button
               type="button"
               className={`filter-button ${mode === "table" ? "active" : ""}`}
@@ -1006,26 +1042,30 @@ export function ObjectivesView({
 
         {mode === "board" ? (
           <div className="board">
-            {OBJ_LANES.map(([laneStatus, label]) => {
-              const cards = matches.filter((o) => o.status === laneStatus);
+            {lanes.map(([laneKey, label]) => {
+              const cards = matches.filter((o) => laneKeyOf(o) === laneKey);
+              const badgeClass =
+                groupBy === "status"
+                  ? `badge ${laneKey}`
+                  : `priority ${laneKey.toLowerCase()}`;
               return (
                 <div
-                  key={laneStatus}
-                  className={`board-lane ${dragLane === laneStatus ? "over" : ""}`}
+                  key={laneKey}
+                  className={`board-lane ${dragLane === laneKey ? "over" : ""}`}
                   onDragOver={(e) => {
                     e.preventDefault();
-                    setDragLane(laneStatus);
+                    setDragLane(laneKey);
                   }}
-                  onDragLeave={() => setDragLane((l) => (l === laneStatus ? null : l))}
+                  onDragLeave={() => setDragLane((l) => (l === laneKey ? null : l))}
                   onDrop={(e) => {
                     e.preventDefault();
                     const id = e.dataTransfer.getData("text/plain");
-                    if (id) onStatusChange?.(id, laneStatus);
+                    if (id) applyLane(id, laneKey);
                     setDragLane(null);
                   }}
                 >
                   <div className="board-lane-head">
-                    <span className={`badge ${laneStatus}`}>{label}</span>
+                    <span className={badgeClass}>{label}</span>
                     <span className="lane-count">{cards.length}</span>
                   </div>
                   <div className="board-lane-body">

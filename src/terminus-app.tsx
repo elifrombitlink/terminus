@@ -1027,6 +1027,9 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
               onStatusChange={(id, status) =>
                 updateObjective(id, { status: status as ObjectiveStatus })
               }
+              onPriorityChange={(id, priority) =>
+                updateObjective(id, { priority: priority as Priority })
+              }
             />
           )}
           {view === "Signals" && (

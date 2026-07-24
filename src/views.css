@@ -462,3 +462,15 @@
   text-transform: uppercase;
   border: 1px dashed var(--line-bright);
 }
+
+.group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 6px;
+  padding-right: 10px;
+  border-right: 1px solid var(--line);
+}
+.group-toggle .micro {
+  margin-right: 2px;
+}
