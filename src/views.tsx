@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import { Barcode, HazardBar, RegMarks } from "./components/insignia";
+import type { LiveMission, LiveSignal } from "./lib/data";
 
 type ObjectiveLike = {
   id: string;
@@ -113,7 +114,7 @@ type Mission = {
   due: string;
 };
 
-const missions: Mission[] = [
+const sampleMissions: Mission[] = [
   {
     id: "MIS-001",
     name: "Terminus Core",
@@ -188,8 +189,15 @@ const missions: Mission[] = [
   },
 ];
 
-export function MissionsView({ query }: { query?: string }) {
-  const rows = missions.filter((m) =>
+export function MissionsView({
+  query,
+  missions,
+}: {
+  query?: string;
+  missions?: LiveMission[];
+}) {
+  const source = missions ?? sampleMissions;
+  const rows = source.filter((m) =>
     hit(query, m.id, m.name, m.brief, m.status, m.lead, ...m.agents),
   );
   return (
@@ -200,9 +208,18 @@ export function MissionsView({ query }: { query?: string }) {
         desc="Every operational theatre under Terminus command, with readiness, ownership, and assigned agent mesh."
         code="MIS // 006"
         readouts={[
-          ["Active", "04"],
-          ["Blocked", "01"],
-          ["Complete", "01"],
+          [
+            "Active",
+            String(source.filter((m) => m.status === "active").length).padStart(2, "0"),
+          ],
+          [
+            "Blocked",
+            String(source.filter((m) => m.status === "blocked").length).padStart(2, "0"),
+          ],
+          [
+            "Complete",
+            String(source.filter((m) => m.status === "complete").length).padStart(2, "0"),
+          ],
         ]}
       />
       <HazardBar label="Theatre" />
@@ -269,7 +286,7 @@ type Signal = {
   time: string;
 };
 
-const signals: Signal[] = [
+const sampleSignals: Signal[] = [
   {
     id: "SIG-4471",
     severity: "critical",
@@ -312,9 +329,18 @@ const signals: Signal[] = [
   },
 ];
 
-export function SignalsView({ query }: { query?: string }) {
+export function SignalsView({
+  query,
+  signals,
+  onAck,
+}: {
+  query?: string;
+  signals?: LiveSignal[];
+  onAck?: (id: string) => void;
+}) {
   const [acked, setAcked] = useState<string[]>([]);
-  const live = signals.filter((s) => !acked.includes(s.id));
+  const source = signals ?? sampleSignals;
+  const live = source.filter((s) => !acked.includes(s.id));
   const rows = live.filter((s) =>
     hit(query, s.id, s.source, s.title, s.detail, s.severity),
   );
@@ -356,7 +382,10 @@ export function SignalsView({ query }: { query?: string }) {
               <button
                 className="tiny-button signal-ack"
                 type="button"
-                onClick={() => setAcked((prev) => [...prev, s.id])}
+                onClick={() => {
+                  setAcked((prev) => [...prev, s.id]);
+                  onAck?.(s.id);
+                }}
               >
                 Ack
               </button>

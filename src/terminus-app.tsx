@@ -15,6 +15,16 @@ import {
   CoreView,
 } from "./views";
 import { useTheme } from "./lib/theme";
+import { useSession } from "./lib/session";
+import {
+  loadWorkspace,
+  dbCreateObjective,
+  dbResolveApproval,
+  dbAddComment,
+  dbAckSignal,
+  type LiveMission,
+  type LiveSignal,
+} from "./lib/data";
 
 function ThemeToggle() {
   const { theme, toggle } = useTheme();
@@ -63,6 +73,7 @@ type Priority = "P0" | "P1" | "P2";
 
 type Objective = {
   id: string;
+  uuid?: string;
   title: string;
   description: string;
   mission: string;
@@ -80,6 +91,7 @@ type Objective = {
 
 type Authorization = {
   id: string;
+  uuid?: string;
   actor: string;
   title: string;
   detail: string;
@@ -297,8 +309,13 @@ function utcClock() {
 }
 
 export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
+  const { demo, session } = useSession();
   const [view, setView] = useState("Command");
   const [navOpen, setNavOpen] = useState(false);
+  const [live, setLive] = useState(false);
+  const [orgId, setOrgId] = useState<string | null>(null);
+  const [missions, setMissions] = useState<LiveMission[] | undefined>(undefined);
+  const [signals, setSignals] = useState<LiveSignal[] | undefined>(undefined);
   const [objectives, setObjectives] = useState(initialObjectives);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | ObjectiveStatus>("all");
@@ -315,6 +332,26 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
     const timer = window.setInterval(() => setClock(utcClock()), 1_000);
     return () => window.clearInterval(timer);
   }, []);
+
+  // Load live workspace data when a Supabase session and organization exist.
+  // On any failure or missing org, the app keeps its sample data.
+  useEffect(() => {
+    if (demo || !session) return;
+    let active = true;
+    loadWorkspace().then((ws) => {
+      if (!active || !ws) return;
+      setLive(true);
+      setOrgId(ws.orgId);
+      setObjectives(ws.objectives as unknown as typeof initialObjectives);
+      setAuthorizations(ws.approvals as unknown as typeof initialAuthorizations);
+      setLog(ws.log);
+      setMissions(ws.missions);
+      setSignals(ws.signals);
+    });
+    return () => {
+      active = false;
+    };
+  }, [demo, session]);
 
   // ⌘K / Ctrl-K focuses the command search; Escape clears an open overlay.
   useEffect(() => {
@@ -371,14 +408,38 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
     ]);
   }
 
-  function addObjective(event: FormEvent<HTMLFormElement>) {
+  async function addObjective(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const title = String(data.get("title") ?? "").trim();
     if (!title) return;
+    const due = String(data.get("due") ?? "2026-08-01");
+    const mission = String(data.get("mission") ?? "TERMINUS CORE");
+    const priority = String(data.get("priority") ?? "P1") as Priority;
+    const description =
+      String(data.get("description") ?? "").trim() ||
+      "Objective briefing awaiting operator detail.";
+
+    // Live path: persist to Supabase, then use the server-assigned record.
+    if (live && orgId) {
+      const created = await dbCreateObjective({
+        orgId,
+        title,
+        description,
+        priority,
+        due: due || null,
+        missionName: mission,
+      });
+      if (created) {
+        setObjectives((current) => [created as unknown as Objective, ...current]);
+        setSelectedId(created.id);
+        setNewOpen(false);
+        return;
+      }
+    }
+
     const nextNumber = String(objectives.length + 1).padStart(2, "0");
     const id = `OBJ-005.${nextNumber}`;
-    const due = String(data.get("due") ?? "2026-08-01");
     const date = new Date(`${due}T12:00:00`);
     const dueLabel = new Intl.DateTimeFormat("en-US", {
       day: "2-digit",
@@ -389,12 +450,10 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
     const objective: Objective = {
       id,
       title,
-      description:
-        String(data.get("description") ?? "").trim() ||
-        "Objective briefing awaiting operator detail.",
-      mission: String(data.get("mission") ?? "TERMINUS CORE"),
+      description,
+      mission,
       status: "queued",
-      priority: String(data.get("priority") ?? "P1") as Priority,
+      priority,
       assignee: "ED",
       due,
       dueLabel,
@@ -428,6 +487,7 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
         item.id === id ? { ...item, state: decision } : item,
       ),
     );
+    if (live && request?.uuid) void dbResolveApproval(request.uuid, decision);
     if (request) {
       setLog((current) => [
         {
@@ -445,6 +505,8 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
     event.preventDefault();
     const body = comment.trim();
     if (!body || !selected) return;
+    if (live && orgId && selected.uuid)
+      void dbAddComment({ orgId, objectiveUuid: selected.uuid, body });
     setObjectives((current) =>
       current.map((objective) =>
         objective.id === selected.id
@@ -927,7 +989,9 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
           </>
           )}
 
-          {view === "Missions" && <MissionsView query={query} />}
+          {view === "Missions" && (
+            <MissionsView query={query} missions={missions} />
+          )}
           {view === "Objectives" && (
             <ObjectivesView
               objectives={objectives}
@@ -939,7 +1003,13 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
               }}
             />
           )}
-          {view === "Signals" && <SignalsView query={query} />}
+          {view === "Signals" && (
+            <SignalsView
+              query={query}
+              signals={signals}
+              onAck={live ? (id) => void dbAckSignal(id) : undefined}
+            />
+          )}
           {view === "Mission Log" && <MissionLogView log={log} query={query} />}
           {view === "Archives" && <ArchivesView query={query} />}
           {view === "Modules" && <ModulesView query={query} />}
