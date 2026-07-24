@@ -6,3 +6,7 @@ dist
 *.log
 .DS_Store
 .wrangler
+
+# stray env backups
+*.hold
+.env.*.local
