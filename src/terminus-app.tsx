@@ -981,7 +981,7 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
                   ×
                 </button>
                 <strong>{selected.id.replace("OBJ-", "")}</strong>
-                <Barcode value={selected.id} bars={32} height={14} code={false} />
+                <Barcode value={selected.id} bars={16} height={14} code={false} />
               </div>
             </div>
             <div className="inspector-body">

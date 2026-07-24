@@ -129,8 +129,12 @@
 }
 .signal-row {
   display: grid;
-  grid-template-columns: 4px 1fr;
+  grid-template-columns: 4px 1fr auto;
   border-bottom: 1px solid var(--line);
+}
+.signal-ack {
+  margin-right: 16px;
+  align-self: center;
 }
 .signal-row:last-child { border-bottom: 0; }
 .signal-row.critical .signal-sev { background: var(--danger); }

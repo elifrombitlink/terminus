@@ -49,7 +49,7 @@ export function SignIn() {
             </div>
             <h2>{mode === "signin" ? "Operator sign in" : "Request access"}</h2>
           </div>
-          <Barcode value="TERM-01-ACS" bars={30} height={16} code={false} />
+          <Barcode value="TERM-01-ACS" bars={24} height={16} code={false} />
         </div>
         <div className="modal-body">
           <div className="field">

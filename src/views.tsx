@@ -313,9 +313,13 @@ const signals: Signal[] = [
 ];
 
 export function SignalsView({ query }: { query?: string }) {
-  const rows = signals.filter((s) =>
+  const [acked, setAcked] = useState<string[]>([]);
+  const live = signals.filter((s) => !acked.includes(s.id));
+  const rows = live.filter((s) =>
     hit(query, s.id, s.source, s.title, s.detail, s.severity),
   );
+  const count = (sev: string) =>
+    String(live.filter((s) => s.severity === sev).length).padStart(2, "0");
   return (
     <>
       <PageHead
@@ -324,13 +328,15 @@ export function SignalsView({ query }: { query?: string }) {
         desc="Prioritised operational signals from agents, modules, and protocols requiring attention or acknowledgement."
         code="SIG // 003"
         readouts={[
-          ["Critical", "01"],
-          ["Warning", "02"],
-          ["Nominal", "02"],
+          ["Critical", count("critical")],
+          ["Warning", count("warning")],
+          ["Open", String(live.length).padStart(2, "0")],
         ]}
       />
       <HazardBar label="Intercept" />
-      {rows.length === 0 && <EmptyState label="signals" />}
+      {rows.length === 0 && (
+        <EmptyState label={acked.length ? "open signals" : "signals"} />
+      )}
       <div className="panel">
         <div className="signal-list">
           {rows.map((s) => (
@@ -347,6 +353,13 @@ export function SignalsView({ query }: { query?: string }) {
                 <h4>{s.title}</h4>
                 <p>{s.detail}</p>
               </div>
+              <button
+                className="tiny-button signal-ack"
+                type="button"
+                onClick={() => setAcked((prev) => [...prev, s.id])}
+              >
+                Ack
+              </button>
             </div>
           ))}
         </div>
