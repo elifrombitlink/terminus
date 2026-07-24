@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Scanner } from "./components/scanner";
 
 type ObjectiveStatus = "active" | "review" | "blocked" | "queued" | "done";
 type Priority = "P0" | "P1" | "P2";
@@ -513,9 +514,7 @@ export function TerminusApp() {
                     </div>
                   </div>
                 </div>
-                <div className="orbital-glyph" aria-hidden="true">
-                  <span className="orbital-line" />
-                </div>
+                <Scanner node="TERM-01" left="RDY" right="HOLD" />
               </div>
             </div>
           </section>

@@ -1,26 +1,29 @@
 
 :root {
-  --void: #0d141a;
-  --ink: #111a21;
-  --panel: #162129;
-  --panel-raised: #1b2831;
-  --line: #34434a;
-  --line-bright: #53636a;
-  --paper: #ddd8ca;
-  --paper-bright: #f0ebdf;
-  --text: #e5e1d6;
-  --muted: #8f9ba0;
-  --quiet: #657278;
-  --blue: #547985;
-  --blue-bright: #79a4ae;
-  --ochre: #b38a49;
-  --rust: #a65a3e;
-  --red: #833d43;
-  --plum: #543a50;
-  --sage: #6d816a;
-  --warning: #c78647;
-  --danger: #ba5d55;
-  --shadow: 0 24px 80px rgb(0 0 0 / 0.24);
+  --void: #0a1015;
+  --ink: #0d151b;
+  --panel: #111d25;
+  --panel-raised: #16242d;
+  --line: #26363f;
+  --line-bright: #43565e;
+  --paper: #dcd7c9;
+  --paper-bright: #efeadd;
+  --text: #dde5e3;
+  --muted: #8a9aa0;
+  --quiet: #5f6f75;
+  --blue: #4d7c8c;
+  --blue-bright: #86c7d4;
+  --scan: #4d7c8c;
+  --scan-bright: #86c7d4;
+  --gold: #e0aa46;
+  --ochre: #c98a3f;
+  --rust: #b0603a;
+  --red: #9a3f42;
+  --plum: #5c3f58;
+  --sage: #6f8a74;
+  --warning: #d59240;
+  --danger: #cf5f54;
+  --shadow: 0 26px 84px rgb(0 0 0 / 0.34);
 }
 
 * {
@@ -1353,3 +1356,187 @@ textarea:focus-visible {
     display: none;
   }
 }
+
+/* ============================================================
+   CONSTELLATION CONSOLE — Starfield-leaning operational layer
+   Deep cockpit surfaces, hairline schematic framing, teal scan
+   accents, and the retro spectrum used as a signature stripe.
+   ============================================================ */
+
+body {
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgb(80 120 140 / 0.05), transparent 60%),
+    linear-gradient(rgb(140 200 220 / 0.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(140 200 220 / 0.014) 1px, transparent 1px),
+    var(--void);
+  background-size: auto, 30px 30px, 30px 30px;
+}
+
+/* Retro spectrum — Constellation stripe order (gold -> plum). */
+.spectrum span:nth-child(1),
+.operator-stripes span:nth-child(1) { background: var(--gold); }
+.spectrum span:nth-child(2),
+.operator-stripes span:nth-child(2) { background: var(--ochre); }
+.spectrum span:nth-child(3),
+.operator-stripes span:nth-child(3) { background: var(--red); }
+.spectrum span:nth-child(4),
+.operator-stripes span:nth-child(4) { background: var(--plum); }
+
+/* Live/interactive cues shift to scan-cyan. */
+.nav-glyph,
+.search-token,
+.nav-item.active .nav-count { color: var(--scan-bright); }
+.nav-item.active {
+  box-shadow: inset 3px 0 var(--scan-bright);
+}
+.objective-marker { color: var(--scan-bright); }
+
+/* ---------- Hero: command bearing ---------- */
+.command-heading {
+  border-color: var(--line);
+  position: relative;
+  overflow: hidden;
+}
+.command-heading::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--gold) 0 22%,
+    var(--ochre) 22% 44%,
+    var(--red) 44% 66%,
+    var(--plum) 66% 84%,
+    transparent 84%
+  );
+  opacity: 0.9;
+}
+.eyebrow { color: var(--scan-bright); }
+.eyebrow::before { background: var(--scan-bright); }
+.heading-copy h1 {
+  font-size: clamp(46px, 6vw, 92px);
+  letter-spacing: -0.03em;
+}
+
+/* ---------- Scanner dial (signature) ---------- */
+.heading-telemetry {
+  position: relative;
+  display: grid;
+  grid-template-rows: 6px 1fr;
+}
+.scanner {
+  position: relative;
+  align-self: center;
+  justify-self: center;
+  width: min(190px, 42vw);
+  aspect-ratio: 1;
+}
+.scanner-dial { width: 100%; height: 100%; overflow: visible; }
+.scanner-dial .dial-ring,
+.scanner-dial .dial-ring-inner {
+  fill: none;
+  stroke: var(--line-bright);
+  stroke-width: 1;
+}
+.scanner-dial .dial-ring-inner { stroke: rgb(134 199 212 / 0.25); }
+.scanner-dial .dial-tick { stroke: var(--line-bright); stroke-width: 1; }
+.scanner-dial .dial-tick.major { stroke: var(--scan-bright); stroke-width: 1.4; }
+.scanner-dial .dial-planet * {
+  fill: none;
+  stroke: rgb(134 199 212 / 0.6);
+  stroke-width: 1;
+}
+.scanner-dial .dial-planet circle:first-child {
+  fill: rgb(134 199 212 / 0.04);
+}
+.scanner-dial .dial-north { fill: var(--gold); stroke: none; }
+.scanner-dial .dial-sweep {
+  stroke: var(--scan-bright);
+  stroke-width: 1.5;
+  transform-origin: 120px 120px;
+  animation: dial-sweep 6s linear infinite;
+  filter: drop-shadow(0 0 4px rgb(134 199 212 / 0.6));
+}
+@keyframes dial-sweep {
+  to { transform: rotate(360deg); }
+}
+.scanner-cap {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.scanner-cap.left { left: -6px; }
+.scanner-cap.right { right: -6px; }
+.scanner-node {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--scan-bright);
+  font-size: 8px;
+  letter-spacing: 0.16em;
+}
+
+/* ---------- Stat cells: cockpit readouts ---------- */
+.stat-card {
+  background:
+    linear-gradient(var(--line-bright) 0 0) 0 0 / 9px 1px no-repeat,
+    linear-gradient(var(--line-bright) 0 0) 0 0 / 1px 9px no-repeat,
+    linear-gradient(var(--line-bright) 0 0) 100% 0 / 9px 1px no-repeat,
+    linear-gradient(var(--line-bright) 0 0) 100% 0 / 1px 9px no-repeat,
+    linear-gradient(var(--line-bright) 0 0) 0 100% / 9px 1px no-repeat,
+    linear-gradient(var(--line-bright) 0 0) 0 100% / 1px 9px no-repeat,
+    linear-gradient(var(--line-bright) 0 0) 100% 100% / 9px 1px no-repeat,
+    linear-gradient(var(--line-bright) 0 0) 100% 100% / 1px 9px no-repeat,
+    var(--panel);
+}
+.stat-value { color: var(--paper-bright); }
+.status-dot { background: var(--scan-bright); box-shadow: 0 0 0 3px rgb(134 199 212 / 0.12); }
+.status-dot.warning { background: var(--warning); box-shadow: 0 0 0 3px rgb(213 146 64 / 0.14); }
+.status-dot.danger { background: var(--danger); box-shadow: 0 0 0 3px rgb(207 95 84 / 0.14); }
+.status-dot.blue { background: var(--scan-bright); }
+
+/* ---------- Objective rows: rarity-style priority edge ---------- */
+.objective-row:has(.priority.p0) { box-shadow: inset 3px 0 var(--danger); }
+.objective-row:has(.priority.p1) { box-shadow: inset 3px 0 var(--ochre); }
+.objective-row.selected { box-shadow: inset 3px 0 var(--scan-bright); }
+.badge.active { color: var(--scan-bright); border-color: var(--scan); }
+
+/* ---------- Panels: schematic framing ---------- */
+.panel { border-color: var(--line); }
+.panel-header { border-bottom-color: var(--line); }
+.panel-heading h2 { color: var(--text); }
+.panel-code { color: var(--scan-bright); opacity: 0.8; }
+.system-state { color: var(--scan-bright); }
+.system-state.standby { color: var(--quiet); }
+.signal-line span { background: var(--scan-bright); }
+
+/* ---------- Primary action: warm retro accent ---------- */
+.primary-button { background: var(--paper); border-color: var(--paper); }
+.primary-button:hover { background: var(--gold); border-color: var(--gold); }
+.icon-button:hover,
+.secondary-button:hover,
+.tiny-button:hover,
+.filter-button:hover { border-color: var(--scan-bright); color: var(--paper-bright); }
+
+@media (prefers-reduced-motion: reduce) {
+  .scanner-dial .dial-sweep { animation: none; }
+}
+
+/* Scanner fit: give the dial its own column and room for the caps. */
+.heading-telemetry .telemetry-body {
+  grid-template-columns: minmax(0, 1fr) 176px;
+  gap: 16px;
+  align-items: center;
+}
+.command-heading { overflow: visible; }
+.scanner { width: 150px; }
+.scanner-cap.left { left: -4px; }
+.scanner-cap.right { right: -4px; }
+
+.timestamp { white-space: nowrap; }
