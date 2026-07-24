@@ -3,6 +3,7 @@
 // (objectives, authorizations, log) is passed in from the app; the rest is
 // representative sample data for the V1 operational picture.
 
+import { useState } from "react";
 import { Barcode, HazardBar, RegMarks } from "./components/insignia";
 
 type ObjectiveLike = {
@@ -892,11 +893,22 @@ export function ObjectivesView({
   selectedId: string | null;
   query?: string;
 }) {
+  const [status, setStatus] = useState<string>("all");
   const open = objectives.filter((o) => o.status !== "done").length;
   const overdue = objectives.filter((o) => o.overdue).length;
-  const rows = objectives.filter((o) =>
-    hit(query, o.id, o.title, o.mission, o.status, o.priority, o.assignee),
+  const rows = objectives.filter(
+    (o) =>
+      (status === "all" || o.status === status) &&
+      hit(query, o.id, o.title, o.mission, o.status, o.priority, o.assignee),
   );
+  const filters: [string, string][] = [
+    ["all", "All"],
+    ["active", "Active"],
+    ["review", "In review"],
+    ["blocked", "Blocked"],
+    ["queued", "Queued"],
+    ["done", "Complete"],
+  ];
   return (
     <>
       <PageHead
@@ -912,10 +924,22 @@ export function ObjectivesView({
       />
       <HazardBar label="Queue" />
       <div className="panel">
+        <div className="filters">
+          {filters.map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={`filter-button ${status === value ? "active" : ""}`}
+              onClick={() => setStatus(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <table className="objective-table">
           <thead>
             <tr>
-              <th>Objective</th>
+              <th style={{ width: "42%" }}>Objective</th>
               <th>Status</th>
               <th>Priority</th>
               <th>Assigned</th>

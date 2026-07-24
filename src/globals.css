@@ -397,7 +397,7 @@ textarea:focus-visible {
 
 .command-heading {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(310px, 0.55fr);
+  grid-template-columns: minmax(0, 1fr) minmax(352px, 0.52fr);
   border: 1px solid var(--line);
   background: var(--panel);
   box-shadow: var(--shadow);
@@ -461,8 +461,9 @@ textarea:focus-visible {
 
 .timestamp {
   margin: 5px 0;
-  font: 700 28px/1 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
-  letter-spacing: 0.04em;
+  font: 700 21px/1 "Chakra Petch", "Arial Narrow", "Bahnschrift", sans-serif;
+  letter-spacing: 0.015em;
+  font-variant-numeric: tabular-nums;
 }
 
 .telemetry-grid {
@@ -1577,8 +1578,9 @@ body {
 .eyebrow { color: var(--scan-bright); }
 .eyebrow::before { background: var(--scan-bright); }
 .heading-copy h1 {
-  font-size: clamp(46px, 6vw, 92px);
-  letter-spacing: -0.03em;
+  font-size: clamp(38px, 5vw, 78px);
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
 }
 
 /* ---------- Scanner dial (signature) ---------- */
@@ -1692,12 +1694,12 @@ body {
 
 /* Scanner fit: give the dial its own column and room for the caps. */
 .heading-telemetry .telemetry-body {
-  grid-template-columns: minmax(0, 1fr) 176px;
+  grid-template-columns: minmax(0, 1fr) 132px;
   gap: 16px;
   align-items: center;
 }
 .command-heading { overflow: visible; }
-.scanner { width: 150px; }
+.scanner { width: 118px; }
 .scanner-cap.left { left: -4px; }
 .scanner-cap.right { right: -4px; }
 

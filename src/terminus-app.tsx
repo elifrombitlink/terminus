@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Scanner } from "./components/scanner";
 import { Barcode, HazardBar } from "./components/insignia";
 import {
@@ -309,10 +309,28 @@ export function TerminusApp() {
   const [activeTab, setActiveTab] = useState("overview");
   const [comment, setComment] = useState("");
   const [clock, setClock] = useState(() => utcClock());
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => setClock(utcClock()), 1_000);
     return () => window.clearInterval(timer);
+  }, []);
+
+  // ⌘K / Ctrl-K focuses the command search; Escape clears an open overlay.
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        searchRef.current?.focus();
+        searchRef.current?.select();
+      } else if (event.key === "Escape") {
+        setNewOpen(false);
+        setSelectedId(null);
+        setNavOpen(false);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   const selected = objectives.find((objective) => objective.id === selectedId);
@@ -533,6 +551,7 @@ export function TerminusApp() {
               ⌕
             </span>
             <input
+              ref={searchRef}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search missions, objectives, archives..."
