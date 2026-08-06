@@ -1919,3 +1919,54 @@ body {
     height: 34px;
   }
 }
+
+/* ============================================================
+   MOVABLE DASHBOARD PANELS — the Command panels share one grid;
+   each can be dragged to reorder (grip) and toggled full/half
+   width (resize). Layout is saved to localStorage.
+   ============================================================ */
+.dashboard-grid {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.85fr);
+  gap: 12px;
+  align-items: start;
+}
+.panel-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+}
+.panel-grip {
+  cursor: grab;
+  color: var(--quiet);
+  font-size: 13px;
+  line-height: 1;
+  user-select: none;
+  padding: 2px;
+}
+.panel-grip:active { cursor: grabbing; }
+.panel-resize {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-bright);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 10px;
+}
+.panel-resize:hover {
+  color: var(--scan-bright);
+  border-color: var(--scan-bright);
+}
+.panel-drop {
+  outline: 1px dashed var(--scan-bright);
+  outline-offset: 2px;
+}
+@media (max-width: 980px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .dashboard-grid > * { grid-column: 1 / -1 !important; }
+}

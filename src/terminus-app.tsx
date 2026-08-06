@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent as ReactDragEvent,
+} from "react";
 import { Scanner } from "./components/scanner";
 import { Barcode, HazardBar } from "./components/insignia";
 import {
@@ -319,6 +326,25 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [missions, setMissions] = useState<LiveMission[] | undefined>(undefined);
   const [signals, setSignals] = useState<LiveSignal[] | undefined>(undefined);
+  const [panels, setPanels] = useState<{
+    order: string[];
+    wide: Record<string, boolean>;
+  }>(() => {
+    const fallback = { order: ["obj", "auth", "log", "sys"], wide: {} };
+    try {
+      const saved = localStorage.getItem("terminus-panels");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.order) && parsed.order.length === 4) {
+          return { order: parsed.order, wide: parsed.wide ?? {} };
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    return fallback;
+  });
+  const [panelOver, setPanelOver] = useState<string | null>(null);
   const [objectives, setObjectives] = useState(initialObjectives);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | ObjectiveStatus>("all");
@@ -446,6 +472,78 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
       if (live && moved.uuid) void dbSetObjectivePosition(moved.uuid, position);
       return next;
     });
+  }
+
+  // --- Command dashboard panel layout (movable + resizable, saved locally) ---
+  useEffect(() => {
+    try {
+      localStorage.setItem("terminus-panels", JSON.stringify(panels));
+    } catch {
+      /* ignore */
+    }
+  }, [panels]);
+
+  function movePanel(dragId: string, targetId: string) {
+    if (dragId === targetId) return;
+    setPanels((current) => {
+      if (!current.order.includes(dragId) || !current.order.includes(targetId))
+        return current;
+      const order = current.order.filter((p) => p !== dragId);
+      order.splice(order.indexOf(targetId), 0, dragId);
+      return { ...current, order };
+    });
+  }
+
+  function togglePanelWide(id: string) {
+    setPanels((current) => ({
+      ...current,
+      wide: { ...current.wide, [id]: !current.wide[id] },
+    }));
+  }
+
+  function panelProps(id: string) {
+    return {
+      className: `panel${panelOver === id ? " panel-drop" : ""}`,
+      style: {
+        order: panels.order.indexOf(id),
+        gridColumn: panels.wide[id] ? ("1 / -1" as const) : undefined,
+      },
+      onDragOver: (event: ReactDragEvent) => {
+        event.preventDefault();
+        setPanelOver(id);
+      },
+      onDragLeave: () => setPanelOver((v) => (v === id ? null : v)),
+      onDrop: (event: ReactDragEvent) => {
+        event.preventDefault();
+        const dragId = event.dataTransfer.getData("panel");
+        if (dragId) movePanel(dragId, id);
+        setPanelOver(null);
+      },
+    };
+  }
+
+  function PanelTools({ id }: { id: string }) {
+    return (
+      <div className="panel-tools">
+        <button
+          className="panel-resize"
+          type="button"
+          title={panels.wide[id] ? "Half width" : "Full width"}
+          aria-label={panels.wide[id] ? "Half width" : "Full width"}
+          onClick={() => togglePanelWide(id)}
+        >
+          {panels.wide[id] ? "◧" : "▭"}
+        </button>
+        <span
+          className="panel-grip"
+          draggable
+          title="Drag to move panel"
+          onDragStart={(event) => event.dataTransfer.setData("panel", id)}
+        >
+          ⠿
+        </span>
+      </div>
+    );
   }
 
   async function addObjective(event: FormEvent<HTMLFormElement>) {
@@ -802,8 +900,8 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
             />
           </section>
 
-          <section className="workspace-grid">
-            <div className="panel">
+          <section className="dashboard-grid">
+            <div {...panelProps("obj")}>
               <div className="panel-header">
                 <div className="panel-heading">
                   <h2>Priority objectives</h2>
@@ -817,6 +915,7 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
                 >
                   Add
                 </button>
+                <PanelTools id="obj" />
               </div>
               <div className="filters">
                 {(
@@ -927,13 +1026,14 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
               </div>
             </div>
 
-            <aside className="panel">
+            <aside {...panelProps("auth")}>
               <div className="panel-header">
                 <div className="panel-heading">
                   <h2>Command authorization</h2>
                   <p>Sensitive actions awaiting operator decision</p>
                 </div>
                 <span className="panel-code">AUTH // {pendingAuth.length}</span>
+                <PanelTools id="auth" />
               </div>
               <div className="authorization-list">
                 {authorizations.map((request) => (
@@ -993,16 +1093,15 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
                 ))}
               </div>
             </aside>
-          </section>
 
-          <section className="lower-grid">
-            <div className="panel">
+            <div {...panelProps("log")}>
               <div className="panel-header">
                 <div className="panel-heading">
                   <h2>Mission log</h2>
                   <p>Immutable operational event stream</p>
                 </div>
                 <span className="panel-code">EVT // APPEND</span>
+                <PanelTools id="log" />
               </div>
               <div className="log-list">
                 {log.map((item, index) => (
@@ -1018,13 +1117,14 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
                 ))}
               </div>
             </div>
-            <div className="panel">
+            <div {...panelProps("sys")}>
               <div className="panel-header">
                 <div className="panel-heading">
                   <h2>System array</h2>
                   <p>Core infrastructure and module telemetry</p>
                 </div>
                 <span className="panel-code">SYS // NOMINAL</span>
+                <PanelTools id="sys" />
               </div>
               <div className="systems">
                 <System name="Supabase" state="Nominal" signal={98} />
