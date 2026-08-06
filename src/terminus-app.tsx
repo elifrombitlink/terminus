@@ -422,9 +422,23 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
   ) {
     const target = objectives.find((objective) => objective.id === id);
     if (target && patch.status && target.status === patch.status) return;
+    // Recompute the displayed date label / overdue flag when the due date moves.
+    const derived: Partial<Objective> = {};
+    if (patch.due) {
+      const date = new Date(`${patch.due}T12:00:00`);
+      if (!Number.isNaN(date.getTime())) {
+        derived.dueLabel = new Intl.DateTimeFormat("en-US", {
+          day: "2-digit",
+          month: "short",
+        })
+          .format(date)
+          .toUpperCase();
+        derived.overdue = date.getTime() < Date.now();
+      }
+    }
     setObjectives((current) =>
       current.map((objective) =>
-        objective.id === id ? { ...objective, ...patch } : objective,
+        objective.id === id ? { ...objective, ...patch, ...derived } : objective,
       ),
     );
     if (live && target?.uuid) {
