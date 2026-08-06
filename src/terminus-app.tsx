@@ -33,6 +33,9 @@ import {
   dbAckSignal,
   type LiveMission,
   type LiveSignal,
+  type LiveModule,
+  type LiveProtocol,
+  type LiveAgent,
 } from "./lib/data";
 
 function ThemeToggle() {
@@ -326,6 +329,9 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [missions, setMissions] = useState<LiveMission[] | undefined>(undefined);
   const [signals, setSignals] = useState<LiveSignal[] | undefined>(undefined);
+  const [modules, setModules] = useState<LiveModule[] | undefined>(undefined);
+  const [protocols, setProtocols] = useState<LiveProtocol[] | undefined>(undefined);
+  const [agents, setAgents] = useState<LiveAgent[] | undefined>(undefined);
   const [panels, setPanels] = useState<{
     order: string[];
     wide: Record<string, boolean>;
@@ -376,6 +382,9 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
       setLog(ws.log);
       setMissions(ws.missions);
       setSignals(ws.signals);
+      setModules(ws.modules);
+      setProtocols(ws.protocols);
+      setAgents(ws.agents);
     });
     return () => {
       active = false;
@@ -1186,8 +1195,10 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
           )}
           {view === "Mission Log" && <MissionLogView log={log} query={query} />}
           {view === "Archives" && <ArchivesView query={query} />}
-          {view === "Modules" && <ModulesView query={query} />}
-          {view === "Protocols" && <ProtocolsView query={query} />}
+          {view === "Modules" && <ModulesView query={query} modules={modules} />}
+          {view === "Protocols" && (
+            <ProtocolsView query={query} protocols={protocols} />
+          )}
           {view === "Authorization" && (
             <AuthorizationView
               authorizations={authorizations}
@@ -1195,7 +1206,7 @@ export function TerminusApp({ onSignOut }: { onSignOut?: () => void } = {}) {
               query={query}
             />
           )}
-          {view === "Terminus Core" && <CoreView query={query} />}
+          {view === "Terminus Core" && <CoreView query={query} agents={agents} />}
         </main>
       </div>
 

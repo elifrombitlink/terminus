@@ -595,7 +595,7 @@ type Module = {
   caps: string[];
 };
 
-const modules: Module[] = [
+const sampleModules: Module[] = [
   {
     name: "Supabase",
     category: "DATA",
@@ -646,21 +646,30 @@ const modules: Module[] = [
   },
 ];
 
-export function ModulesView({ query }: { query?: string }) {
-  const rows = modules.filter((m) =>
+export function ModulesView({
+  query,
+  modules,
+}: {
+  query?: string;
+  modules?: Module[];
+}) {
+  const source = modules && modules.length ? modules : sampleModules;
+  const rows = source.filter((m) =>
     hit(query, m.name, m.category, m.state, m.detail, ...m.caps),
   );
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const count = (s: Module["state"]) => source.filter((m) => m.state === s).length;
   return (
     <>
       <PageHead
         eyebrow="Connected systems // mesh"
         title="Modules"
         desc="Every connected system exposed through the standard module contract, with live health and capability surface."
-        code="MOD // 006"
+        code={`MOD // ${pad(source.length)}`}
         readouts={[
-          ["Nominal", "04"],
-          ["Standby", "02"],
-          ["Offline", "00"],
+          ["Nominal", pad(count("nominal"))],
+          ["Standby", pad(count("standby"))],
+          ["Offline", pad(count("offline"))],
         ]}
       />
       <HazardBar label="Interface" />
@@ -713,7 +722,7 @@ type Protocol = {
   runs: number;
 };
 
-const protocols: Protocol[] = [
+const sampleProtocols: Protocol[] = [
   {
     id: "PRT-006",
     name: "Nightly health sweep",
@@ -761,21 +770,31 @@ const protocols: Protocol[] = [
   },
 ];
 
-export function ProtocolsView({ query }: { query?: string }) {
-  const rows = protocols.filter((p) =>
+export function ProtocolsView({
+  query,
+  protocols,
+}: {
+  query?: string;
+  protocols?: Protocol[];
+}) {
+  const source = protocols && protocols.length ? protocols : sampleProtocols;
+  const rows = source.filter((p) =>
     hit(query, p.id, p.name, p.trigger, p.schedule, p.lastRun, p.state),
   );
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const running = source.filter((p) => p.state === "running").length;
+  const flagged = source.filter((p) => p.state === "flagged").length;
   return (
     <>
       <PageHead
         eyebrow="Automation runner // protocols"
         title="Protocols"
         desc="Scheduled and triggered automations executed against modules under audit and authorization control."
-        code="PRT // 008"
+        code={`PRT // ${pad(source.length)}`}
         readouts={[
-          ["Active", "08"],
-          ["Running", "01"],
-          ["Failed", "00"],
+          ["Active", pad(source.length)],
+          ["Running", pad(running)],
+          ["Flagged", pad(flagged)],
         ]}
       />
       <HazardBar label="Runner" />
@@ -814,7 +833,7 @@ export function ProtocolsView({ query }: { query?: string }) {
           </tbody>
         </table>
         <div className="panel-footer">
-          <span>{protocols.length} protocols // 8 active</span>
+          <span>{source.length} protocols // {source.filter((p) => p.state !== "pending").length} active</span>
           <Barcode value="PRT-RUNNER-08" bars={50} height={16} />
         </div>
       </div>
@@ -832,7 +851,7 @@ type Agent = {
   clearance: string;
 };
 
-const agents: Agent[] = [
+const sampleAgents: Agent[] = [
   {
     name: "ODIN",
     role: "Coordinator",
@@ -863,10 +882,18 @@ const agents: Agent[] = [
   },
 ];
 
-export function CoreView({ query }: { query?: string }) {
-  const roster = agents.filter((a) =>
+export function CoreView({
+  query,
+  agents,
+}: {
+  query?: string;
+  agents?: Agent[];
+}) {
+  const source = agents && agents.length ? agents : sampleAgents;
+  const roster = source.filter((a) =>
     hit(query, a.name, a.role, a.fn, a.state, a.clearance),
   );
+  const readyCount = source.filter((a) => a.state === "ready").length;
   return (
     <>
       <PageHead
@@ -875,7 +902,7 @@ export function CoreView({ query }: { query?: string }) {
         desc="The reasoning core and Pantheon agent mesh. Configuration, clearances, and memory backing the operational picture."
         code="CORE // 001"
         readouts={[
-          ["Mesh", "6 / 7"],
+          ["Mesh", `${readyCount} / ${source.length}`],
           ["Node", "TERM-01"],
           ["Clearance", "ADMIN"],
         ]}

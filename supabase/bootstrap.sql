@@ -141,5 +141,47 @@ begin
     (v_org_id, 'protocol', 'info', 'Nightly health sweep passed',
      'PRT-006 completed across 5 modules. 0 failed checks.', 'PROTOCOL');
 
+  -- Connected modules (global table; manifest carries console display fields)
+  insert into public.modules (code, name, provider, version, enabled, manifest) values
+    ('supabase', 'Supabase', 'Supabase', '2.x', true,
+      jsonb_build_object('category','DATA','state','nominal','signal',98,
+        'detail','Postgres, authentication, row-level security, and pgvector store.',
+        'caps', jsonb_build_array('QUERY','AUTH','VECTOR'))),
+    ('redis-queue', 'Redis queue', 'Redis', '7.x', true,
+      jsonb_build_object('category','QUEUE','state','nominal','signal',94,
+        'detail','Job transport and rate-limited action dispatch for protocols.',
+        'caps', jsonb_build_array('ENQUEUE','DISPATCH'))),
+    ('n8n-protocols', 'n8n protocols', 'n8n', '1.x', true,
+      jsonb_build_object('category','AUTOMATION','state','nominal','signal',91,
+        'detail','Workflow automation runner for scheduled and triggered protocols.',
+        'caps', jsonb_build_array('TRIGGER','RUN','WEBHOOK'))),
+    ('ollama-inference', 'Ollama inference', 'Ollama', '0.x', true,
+      jsonb_build_object('category','INFERENCE','state','standby','signal',63,
+        'detail','Local model host for private inference. On standby at reduced capacity.',
+        'caps', jsonb_build_array('GENERATE','EMBED'))),
+    ('github', 'GitHub module', 'GitHub', '1.x', true,
+      jsonb_build_object('category','SCM','state','standby','signal',38,
+        'detail','Repository health, issue reads, and gated draft issue creation.',
+        'caps', jsonb_build_array('HEALTH','ISSUE.READ','ISSUE.DRAFT'))),
+    ('pgvector', 'pgvector', 'Supabase', '0.7', true,
+      jsonb_build_object('category','MEMORY','state','nominal','signal',90,
+        'detail','Embedding store backing archive retrieval and agent memory.',
+        'caps', jsonb_build_array('UPSERT','SEARCH')))
+  on conflict (code) do nothing;
+
+  -- Protocols (org-scoped; definition carries runner display fields)
+  insert into public.protocols (organization_id, code, name, description, enabled, risk, definition) values
+    (v_org_id, 'PRT-006', 'Nightly health sweep', 'Scheduled module health inspection across the mesh.', true, 'low',
+      jsonb_build_object('trigger','SCHEDULE','schedule','06:00 UTC · daily','lastRun','06:13 · passed','state','ok','runs',214)),
+    (v_org_id, 'PRT-004', 'Objective SLA watch', 'Flags objectives that breach their SLA window.', true, 'medium',
+      jsonb_build_object('trigger','EVENT','schedule','on overdue','lastRun','06:14 · flagged OBJ-003.02','state','flagged','runs',1809)),
+    (v_org_id, 'PRT-002', 'Event outbox drain', 'Streams domain events from the transactional outbox.', true, 'low',
+      jsonb_build_object('trigger','CONTINUOUS','schedule','streaming','lastRun','live · 148 events','state','running','runs',44210)),
+    (v_org_id, 'PRT-009', 'Operator digest compile', 'Compiles the daily operator digest.', true, 'low',
+      jsonb_build_object('trigger','SCHEDULE','schedule','18:00 UTC · daily','lastRun','18:00 · passed','state','ok','runs',96)),
+    (v_org_id, 'PRT-011', 'Archive reindex', 'Rebuilds the archive embedding index.', false, 'low',
+      jsonb_build_object('trigger','SCHEDULE','schedule','SUN 03:00 UTC · weekly','lastRun','queued for next window','state','pending','runs',12))
+  on conflict (organization_id, code) do nothing;
+
   raise notice 'Terminus bootstrap complete for %.', v_email;
 end $$;

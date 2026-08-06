@@ -68,6 +68,33 @@ export type LiveSignal = {
   time: string;
 };
 
+export type LiveModule = {
+  name: string;
+  category: string;
+  state: "nominal" | "standby" | "offline";
+  signal: number;
+  detail: string;
+  caps: string[];
+};
+
+export type LiveProtocol = {
+  id: string;
+  name: string;
+  trigger: string;
+  schedule: string;
+  lastRun: string;
+  state: "ok" | "flagged" | "running" | "pending";
+  runs: number;
+};
+
+export type LiveAgent = {
+  name: string;
+  role: string;
+  fn: string;
+  state: "ready" | "held";
+  clearance: string;
+};
+
 export type Workspace = {
   orgId: string;
   objectives: LiveObjective[];
@@ -75,6 +102,9 @@ export type Workspace = {
   approvals: LiveApproval[];
   log: LiveLogEntry[];
   signals: LiveSignal[];
+  modules: LiveModule[];
+  protocols: LiveProtocol[];
+  agents: LiveAgent[];
 };
 
 /* ------------------------------------------------------------- formatters */
@@ -317,6 +347,80 @@ async function loadSignals(orgId: string): Promise<LiveSignal[]> {
   }));
 }
 
+async function loadModules(): Promise<LiveModule[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("modules")
+    .select("name, manifest, enabled")
+    .order("created_at", { ascending: true });
+  if (error || !data) return [];
+  const states = new Set(["nominal", "standby", "offline"]);
+  return data.map((row: Record<string, any>) => {
+    const m = row.manifest ?? {};
+    const state = states.has(m.state) ? m.state : row.enabled ? "nominal" : "offline";
+    return {
+      name: row.name,
+      category: String(m.category ?? "MODULE").toUpperCase(),
+      state: state as LiveModule["state"],
+      signal: typeof m.signal === "number" ? m.signal : 0,
+      detail: m.detail ?? "",
+      caps: Array.isArray(m.caps) ? m.caps.map((c: any) => String(c)) : [],
+    };
+  });
+}
+
+async function loadProtocols(orgId: string): Promise<LiveProtocol[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("protocols")
+    .select("code, name, definition, created_at")
+    .eq("organization_id", orgId)
+    .order("created_at", { ascending: true });
+  if (error || !data) return [];
+  const states = new Set(["ok", "flagged", "running", "pending"]);
+  return data.map((row: Record<string, any>) => {
+    const d = row.definition ?? {};
+    return {
+      id: row.code,
+      name: row.name,
+      trigger: String(d.trigger ?? "MANUAL").toUpperCase(),
+      schedule: d.schedule ?? "—",
+      lastRun: d.lastRun ?? "—",
+      state: (states.has(d.state) ? d.state : "pending") as LiveProtocol["state"],
+      runs: typeof d.runs === "number" ? d.runs : 0,
+    };
+  });
+}
+
+async function loadAgents(orgId: string): Promise<LiveAgent[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("agents")
+    .select("code, name, description, state, maximum_autonomous_risk, created_at")
+    .eq("organization_id", orgId)
+    .order("created_at", { ascending: true });
+  if (error || !data) return [];
+  const clearanceMap: Record<string, string> = {
+    critical: "RESTRICTED",
+    high: "RESTRICTED",
+    medium: "OPERATOR",
+    low: "OBSERVER",
+  };
+  return data.map((row: Record<string, any>) => {
+    const desc = String(row.description ?? "");
+    const [rolePart, ...rest] = desc.split(/\s[—-]\s/);
+    const role = rest.length ? rolePart.trim() : "Agent";
+    const fn = rest.length ? rest.join(" — ").trim() : desc;
+    return {
+      name: String(row.code ?? row.name).toUpperCase(),
+      role,
+      fn,
+      state: row.state === "active" ? "ready" : "held",
+      clearance: clearanceMap[row.maximum_autonomous_risk] ?? "OBSERVER",
+    };
+  });
+}
+
 function escapeHtml(s: string): string {
   return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] ?? c);
 }
@@ -328,13 +432,27 @@ export async function loadWorkspace(): Promise<Workspace | null> {
   if (!orgId) return null;
   try {
     const objectives = await loadObjectives(orgId);
-    const [missions, approvals, log, signals] = await Promise.all([
-      loadMissions(orgId, objectives),
-      loadApprovals(orgId),
-      loadLog(orgId),
-      loadSignals(orgId),
-    ]);
-    return { orgId, objectives, missions, approvals, log, signals };
+    const [missions, approvals, log, signals, modules, protocols, agents] =
+      await Promise.all([
+        loadMissions(orgId, objectives),
+        loadApprovals(orgId),
+        loadLog(orgId),
+        loadSignals(orgId),
+        loadModules(),
+        loadProtocols(orgId),
+        loadAgents(orgId),
+      ]);
+    return {
+      orgId,
+      objectives,
+      missions,
+      approvals,
+      log,
+      signals,
+      modules,
+      protocols,
+      agents,
+    };
   } catch {
     return null;
   }
